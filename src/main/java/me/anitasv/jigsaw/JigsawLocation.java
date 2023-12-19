@@ -1,6 +1,6 @@
-package me.anitasv;
+package me.anitasv.jigsaw;
 
-record JigsawLocation(int m, int n, int s) {
+public record JigsawLocation(int m, int n, int s) {
 
     @Override
     public String toString() {

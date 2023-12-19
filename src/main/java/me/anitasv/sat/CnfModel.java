@@ -1,13 +1,14 @@
-package me.anitasv;
+package me.anitasv.sat;
+
+import me.anitasv.sat.SatModel;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 
-class CnfModel implements SatModel {
+public class CnfModel implements SatModel {
 
     // All these expressions must be simultaneously be true
 //    private final List<int[]> cnf = new ArrayList<>();
@@ -19,6 +20,9 @@ class CnfModel implements SatModel {
     private final String fileName;
 
     private final String satSolverPath;
+    private final File headFile;
+    private final File tailFile;
+
 
     /**
      * Writes the clauses to the file as it gets excecuted incrementally to avoid
@@ -37,9 +41,11 @@ class CnfModel implements SatModel {
      */
     public CnfModel(String title,
                     String fileName,
-                    String satSolverPath) throws FileNotFoundException {
+                    String satSolverPath) throws IOException {
 
-        FileOutputStream tailStream = new FileOutputStream(fileName + ".tail");
+        this.tailFile = File.createTempFile(fileName, ".tail");
+        this.headFile = File.createTempFile(fileName, ".head");
+        FileOutputStream tailStream = new FileOutputStream(tailFile);
         this.printWriter = new PrintWriter(tailStream, true, StandardCharsets.UTF_8);
         this.fileName = fileName;
         this.title = title;
@@ -90,10 +96,10 @@ class CnfModel implements SatModel {
         writeClause(lhs);
     }
 
-    public void close() throws FileNotFoundException {
+    public void close() throws IOException {
         printWriter.close();
 
-        FileOutputStream headStream = new FileOutputStream(fileName + ".head");
+        FileOutputStream headStream = new FileOutputStream(headFile);
         PrintWriter headWriter = new PrintWriter(headStream, true, StandardCharsets.UTF_8);
         headWriter.println("c");
         headWriter.println("c Title: " + title);
@@ -111,19 +117,25 @@ class CnfModel implements SatModel {
     public Set<Integer> solve() {
         try {
             this.close();
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        System.out.println("File Written");
+        System.out.println("Files Written.");
         ProcessBuilder concat = new ProcessBuilder("/bin/cat",
-                this.fileName + ".head",
-                this.fileName + ".tail");
-        concat.redirectOutput(new File(this.fileName));
+                headFile.getAbsolutePath(),
+                tailFile.getAbsolutePath());
+
+        File satInput;
+        try {
+            satInput = File.createTempFile(this.fileName, ".cnf");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        concat.redirectOutput(satInput);
 
         try {
             Process concatProcess = concat.start();
-            System.out.println("Waiting for concat");
+            System.out.println("Waiting for concat.");
             int concatExit = concatProcess.waitFor();
             if (concatExit != 0) {
                 throw new RuntimeException("/bin/cat failed with status: " + concatExit);
@@ -131,30 +143,39 @@ class CnfModel implements SatModel {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("File Concatenated");
+        System.out.println("File Concatenated.");
 
+
+        File satOutput;
+        try {
+            satOutput = File.createTempFile(this.fileName, ".out");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        System.out.println("SAT input: " + satInput.getAbsolutePath());
+        System.out.println("SAT output: " + satOutput.getAbsolutePath());
         ProcessBuilder miniSat = new ProcessBuilder(satSolverPath,
-                this.fileName,
-                this.fileName + ".out")
+                satInput.getAbsolutePath(),
+                satOutput.getAbsolutePath())
                 .inheritIO();
 
         try {
             Process miniProcess = miniSat.start();
-            System.out.println("Waiting for miniSAT");
+            System.out.println("Waiting for SAT solver.");
             miniProcess.waitFor();
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("miniSAT done");
+        System.out.println("SAT solver done");
 
         String fileContents;
         try {
-            fileContents = Files.readString(
-                    new File(this.fileName + ".out").toPath());
+            fileContents = Files.readString(satOutput.toPath());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("Reading solution");
+        System.out.println("Reading solution.");
 
         Set<Integer> solution = new HashSet<>();
 
@@ -165,7 +186,7 @@ class CnfModel implements SatModel {
                 solution.add(number);
             }
         }
-        System.out.println("Done parsing solution");
+        System.out.println("Done parsing solution.");
         return solution;
     }
 }

@@ -1,26 +1,26 @@
-package me.anitasv;
+package me.anitasv.jigsaw;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-class JigSaw {
+public class Jigsaw {
 
     public static final int SIDES = 4;
     public static final int TOP = 0, RIGHT = 1, BOT = 2, LEFT = 3;
 
     public final int M;
     public final int N;
-    public final Piece[][] pieces;
+    public final JigsawPiece[][] pieces;
 
-    JigSaw(int M, int N) {
+    public Jigsaw(int M, int N) {
         this.M = M;
         this.N = N;
-        this.pieces = new Piece[M][N];
+        this.pieces = new JigsawPiece[M][N];
         for (int i = 0; i < M; i++) {
             for (int j = 0; j < N; j++) {
-                this.pieces[i][j] = new Piece();
+                this.pieces[i][j] = new JigsawPiece();
             }
         }
         this.generate();
@@ -32,24 +32,21 @@ class JigSaw {
         // Flip LEFT | RIGHT banners.
         for (int m = 0; m < M; m++) {
             for (int n = 0; n < N - 1; n++) {
-                Poke pokeRight = random.nextBoolean() ? Poke.IN : Poke.OUT;
-                this.pieces[m][n].pokes[JigSaw.RIGHT] = pokeRight;
-                this.pieces[m][n + 1].pokes[JigSaw.LEFT] = pokeRight.flip();
+                JigsawPoke pokeRight = random.nextBoolean() ? JigsawPoke.IN : JigsawPoke.OUT;
+                this.pieces[m][n].pokes[Jigsaw.RIGHT] = pokeRight;
+                this.pieces[m][n + 1].pokes[Jigsaw.LEFT] = pokeRight.flip();
             }
         }
         for (int n = 0; n < N; n++) {
             for (int m = 0; m < M - 1; m++) {
-                Poke pokeBot = random.nextBoolean() ? Poke.IN : Poke.OUT;
-                this.pieces[m][n].pokes[JigSaw.BOT] = pokeBot;
-                this.pieces[m + 1][n].pokes[JigSaw.TOP] = pokeBot.flip();
+                JigsawPoke pokeBot = random.nextBoolean() ? JigsawPoke.IN : JigsawPoke.OUT;
+                this.pieces[m][n].pokes[Jigsaw.BOT] = pokeBot;
+                this.pieces[m + 1][n].pokes[Jigsaw.TOP] = pokeBot.flip();
             }
         }
     }
 
-    record RetainPos(int m, int n, Piece piece) {
-    }
-
-    record RetainPosRot(JigsawLocation loc, Piece piece) {
+    record RetainPos(int m, int n, JigsawPiece piece) {
     }
 
     /**
@@ -57,7 +54,7 @@ class JigSaw {
      *
      * @return new random permutation+rotation of pieces.
      */
-    public RetainPosRot[] shuffle() {
+    public JigsawLocPiece[] shuffle() {
         List<RetainPos> moveAround = new ArrayList<>(M * N);
         for (int m = 0; m < M; m++) {
             for (int n = 0; n < N; n++) {
@@ -66,15 +63,15 @@ class JigSaw {
         }
         Collections.shuffle(moveAround, ThreadLocalRandom.current());
 
-        RetainPosRot[] rotatePieces = new RetainPosRot[M * N];
+        JigsawLocPiece[] rotatePieces = new JigsawLocPiece[M * N];
         for (int i = 0; i < moveAround.size(); i++) {
-            int k = ThreadLocalRandom.current().nextInt(JigSaw.SIDES);
+            int k = ThreadLocalRandom.current().nextInt(Jigsaw.SIDES);
             RetainPos info = moveAround.get(i);
-            Piece piece = new Piece();
-            for (int j = 0; j < JigSaw.SIDES; j++) {
-                piece.pokes[j] = info.piece.pokes[(j + k) % JigSaw.SIDES];
+            JigsawPiece piece = new JigsawPiece();
+            for (int j = 0; j < Jigsaw.SIDES; j++) {
+                piece.pokes[j] = info.piece.pokes[(j + k) % Jigsaw.SIDES];
             }
-            rotatePieces[i] = new RetainPosRot(new JigsawLocation(info.m, info.n, k), piece);
+            rotatePieces[i] = new JigsawLocPiece(new JigsawLocation(info.m, info.n, k), piece);
         }
         return rotatePieces;
     }
@@ -86,7 +83,7 @@ class JigSaw {
             // top line
             for (int n = 0; n < N; n++) {
                 builder.append("   ");
-                switch (this.pieces[m][n].pokes[JigSaw.TOP]) {
+                switch (this.pieces[m][n].pokes[Jigsaw.TOP]) {
                     case FLAT:
                         builder.append("-");
                         break;
@@ -104,7 +101,7 @@ class JigSaw {
             }
             builder.append(" \n");
             for (int n = 0; n < N; n++) {
-                switch (this.pieces[m][n].pokes[JigSaw.LEFT]) {
+                switch (this.pieces[m][n].pokes[Jigsaw.LEFT]) {
                     case FLAT:
                         builder.append("|");
                         break;
@@ -116,7 +113,7 @@ class JigSaw {
                         break;
                 }
                 builder.append("     ");
-                switch (this.pieces[m][n].pokes[JigSaw.RIGHT]) {
+                switch (this.pieces[m][n].pokes[Jigsaw.RIGHT]) {
                     case FLAT:
                         builder.append("|");
                         break;
@@ -132,7 +129,7 @@ class JigSaw {
 
             for (int n = 0; n < N; n++) {
                 builder.append("   ");
-                switch (this.pieces[m][n].pokes[JigSaw.BOT]) {
+                switch (this.pieces[m][n].pokes[Jigsaw.BOT]) {
                     case FLAT:
                         builder.append("-");
                         break;

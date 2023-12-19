@@ -1,8 +1,8 @@
-package me.anitasv;
+package me.anitasv.sat;
 
 import java.util.Set;
 
-interface SatModel {
+public interface SatModel {
     void addExactlyOne(int[] literals);
 
     public void addBoolOr(int[] lhs);

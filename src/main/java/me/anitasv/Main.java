@@ -1,39 +1,27 @@
 package me.anitasv;
 
 import com.google.ortools.Loader;
+import me.anitasv.jigsaw.*;
+import me.anitasv.sat.CnfModel;
+import me.anitasv.sat.GoogleModel;
+import me.anitasv.sat.SatModel;
 
 import java.io.IOException;
 import java.util.List;
 
 
 /**
- * Solves White Jigsaw Puzzles - meaning no image, only if information we have are the
- * shape of pieces.
- *
- * Formulation : https://mathb.in/77183
- *
- * It can be run in two modes using Google OR Tools (default), or change code
- * to run using any model that accepts DIMACS file as input like MiniSAT. Later one
- * is more scalable because it won't die because of JVM limits.
- *
- * MiniSat specifically is not better than Google OR Tools, and printing back
- * the solution is currently not supported, only creating the file and you have
- * to manually invoke the tool you like. Using Glucose may be better but I can't
- * get it to run on Mac M2 silicon.
- *
- * To create DIMACS file I implemented a variant of Tseitin Transform for "exactly one"
- * constraints. This may be what is causing poor MiniSat performance in comparison
- * to OR Tools, because OR tools directly work out of the circuit in SMT solver.
+ * Solves White Jigsaw Puzzles.
  */
 public class Main {
 
     private static void formulateAndSolve(int M, int N, SatModel model) throws IOException {
-        JigSaw jigSaw = new JigSaw(M, N);
+        Jigsaw jigSaw = new Jigsaw(M, N);
         System.out.println("Source diagram:");
         System.out.println(jigSaw);
-        JigSaw.RetainPosRot[] withSoln = jigSaw.shuffle();
+        JigsawLocPiece[] withSoln = jigSaw.shuffle();
 
-        Piece[] B = new Piece[withSoln.length];
+        JigsawPiece[] B = new JigsawPiece[withSoln.length];
         JigsawLocation[] L = new JigsawLocation[withSoln.length];
         for (int i = 0; i < withSoln.length; i++) {
             B[i] = withSoln[i].piece();
@@ -42,6 +30,7 @@ public class Main {
 
         JigsawSolver jigsawSolver = new JigsawSolver(M, N, B);
 
+        System.out.println("Formulating SAT problem.");
         jigsawSolver.formulate(model);
         List<JigsawLocation> solution = jigsawSolver.solve(model);
 
@@ -76,15 +65,15 @@ public class Main {
             }
         }
         if (randomProblem) {
-            System.out.println("Using random jigsaw puzzle");
+            System.out.println("Using random jigsaw puzzle.");
         } else {
-            System.out.println("User input not supported, please use --random for example");
+            System.out.println("User input not supported, please use --random for example.");
         }
         if (M == null) {
-            System.out.println("Argument M not found pass --M=[rows]");
+            System.out.println("Argument M not found pass --M=[rows].");
         }
         if (N == null) {
-            System.out.println("Argument N not found pass --N=[cols]");
+            System.out.println("Argument N not found pass --N=[cols].");
         }
 
 
@@ -92,12 +81,12 @@ public class Main {
             SatModel model;
 
             if (satSolverPath == null) {
-                System.out.println("Argument --sat_solver_path=[path] missing, using Google OR Tools");
+                System.out.println("Argument --sat_solver_path=[path] missing, using Google OR Tools.");
                 Loader.loadNativeLibraries();
                 model = new GoogleModel();
             } else {
                 model = new CnfModel("Jigsaw " + M + "x" + N,
-                        "/tmp/jig_rand_" + M + "x" + N + ".cnf",
+                        "jig_rand_" + M + "x" + N + ".",
                         satSolverPath);
             }
             formulateAndSolve(M, N, model);

@@ -1,22 +1,27 @@
-package me.anitasv;
+package me.anitasv.jigsaw;
+
+import me.anitasv.sat.SatModel;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static me.anitasv.JigSaw.SIDES;
+import static me.anitasv.jigsaw.Jigsaw.SIDES;
 
+/**
+ * Formulation : https://mathb.in/77183
+ */
 public class JigsawSolver {
 
     private final int M;
     private final int N;
-    private final Piece[] B;
+    private final JigsawPiece[] B;
     private final int tot;
     private final int[][][] X;
     private final int[][] Y;
 
-    JigsawSolver(int M, int N, Piece[] B) {
+    public JigsawSolver(int M, int N, JigsawPiece[] B) {
         this.M = M;
         this.N = N;
         this.B = B;
@@ -36,7 +41,7 @@ public class JigsawSolver {
 
         for (int k = 0; k < tot; k++) {
             for (int s = 0; s < SIDES; s++) {
-                Y[k][s] = model.newVariable("X_{" + k + "," + s + "}");
+                Y[k][s] = model.newVariable("Y_{" + k + "," + s + "}");
             }
         }
 
@@ -72,8 +77,8 @@ public class JigsawSolver {
             for (int s = 0; s < SIDES; s++) {
                 for (int l = 0; l < tot; l++) {
                     for (int t = 0; t < SIDES; t++) {
-                        boolean rhsBotTop = B[k].pokes[(JigSaw.BOT + s ) % SIDES].val +
-                                B[l].pokes[(JigSaw.TOP + t) % SIDES].val == 0;
+                        boolean rhsBotTop = B[k].pokes[(Jigsaw.BOT + s ) % SIDES].val +
+                                B[l].pokes[(Jigsaw.TOP + t) % SIDES].val == 0;
                         // A => rhs
                         if (!rhsBotTop) {
                             // then A must be false.
@@ -90,8 +95,8 @@ public class JigsawSolver {
                             }
                         }
 
-                        boolean rhsRightLeft = B[k].pokes[(JigSaw.RIGHT + s ) % SIDES].val +
-                                B[l].pokes[(JigSaw.LEFT + t) % SIDES].val == 0;
+                        boolean rhsRightLeft = B[k].pokes[(Jigsaw.RIGHT + s ) % SIDES].val +
+                                B[l].pokes[(Jigsaw.LEFT + t) % SIDES].val == 0;
                         // A => rhs
                         if (!rhsRightLeft) {
                             // then A must be false.
@@ -114,7 +119,7 @@ public class JigsawSolver {
 
         for (int k = 0; k < tot; k++) {
             for (int s = 0; s < SIDES; s++) {
-                boolean rhsTop = B[k].pokes[(JigSaw.TOP+s) % SIDES] == Poke.FLAT;
+                boolean rhsTop = B[k].pokes[(Jigsaw.TOP+s) % SIDES] == JigsawPoke.FLAT;
                 if (!rhsTop) {
                     for (int n = 0; n < N; n++) {
                         int []lhs = new int[] {
@@ -125,7 +130,7 @@ public class JigsawSolver {
                     }
                 }
 
-                boolean rhsBot = B[k].pokes[(JigSaw.BOT+s) % SIDES] == Poke.FLAT;
+                boolean rhsBot = B[k].pokes[(Jigsaw.BOT+s) % SIDES] == JigsawPoke.FLAT;
                 if (!rhsBot) {
                     for (int n = 0; n < N; n++) {
                         int []lhs = new int[] {
@@ -135,7 +140,7 @@ public class JigsawSolver {
                         model.addBoolOr(lhs);
                     }
                 }
-                boolean rhsRight = B[k].pokes[(JigSaw.RIGHT+s) % SIDES] == Poke.FLAT;
+                boolean rhsRight = B[k].pokes[(Jigsaw.RIGHT+s) % SIDES] == JigsawPoke.FLAT;
                 if (!rhsRight) {
                     for (int m = 0; m < M; m++) {
                         int []lhs = new int[] {
@@ -145,7 +150,7 @@ public class JigsawSolver {
                         model.addBoolOr(lhs);
                     }
                 }
-                boolean rhsLeft = B[k].pokes[(JigSaw.LEFT+s) % SIDES] == Poke.FLAT;
+                boolean rhsLeft = B[k].pokes[(Jigsaw.LEFT+s) % SIDES] == JigsawPoke.FLAT;
                 if (!rhsLeft) {
                     for (int m = 0; m < M; m++) {
                         int []lhs = new int[] {
@@ -159,7 +164,7 @@ public class JigsawSolver {
         }
     }
 
-    List<JigsawLocation> solve(SatModel model) {
+    public List<JigsawLocation> solve(SatModel model) {
         //  Create a solver and solve the model.
         Set<Integer> solution = model.solve();
 
@@ -168,7 +173,7 @@ public class JigsawSolver {
             return null;
         }
 
-        JigSaw jigSaw = new JigSaw(M, N);
+        Jigsaw jigSaw = new Jigsaw(M, N);
         List<JigsawLocation> locs = new ArrayList<>();
         boolean hasError = false;
         for (int k = 0; k < M * jigSaw.N; k++) {

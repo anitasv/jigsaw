@@ -1,25 +1,25 @@
-package me.anitasv;
+package me.anitasv.jigsaw;
 
-enum Poke {
+public enum JigsawPoke {
     FLAT(0),
     IN(1),
     OUT(-1);
 
     public final int val;
 
-    Poke(int val) {
+    JigsawPoke(int val) {
         this.val = val;
     }
 
 
-    Poke flip() {
+    public JigsawPoke flip() {
         switch (this) {
             case FLAT:
-                return Poke.FLAT;
+                return JigsawPoke.FLAT;
             case IN:
-                return Poke.OUT;
+                return JigsawPoke.OUT;
             case OUT:
-                return Poke.IN;
+                return JigsawPoke.IN;
             default:
                 return this;
         }
