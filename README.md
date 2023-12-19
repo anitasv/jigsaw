@@ -1,9 +1,7 @@
 
 
 Solves White jigsaw puzzles, inspired by the video by Stuff Made Here:
-https://www.youtube.com/watch?v=Gu_1S77XkiM. He seem to have solved
-in another video: https://www.youtube.com/watch?v=WsPHBD5NsS0 but here
-I go anyway:
+https://www.youtube.com/watch?v=Gu_1S77XkiM and https://www.youtube.com/watch?v=WsPHBD5NsS0 but here
 
 Formulation: https://mathb.in/77183
 
