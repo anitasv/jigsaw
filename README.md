@@ -4,7 +4,7 @@ Solves White jigsaw puzzles, inspired by the video by Stuff Made Here:
 https://www.youtube.com/watch?v=Gu_1S77XkiM
 
 He didn't solve this part in the video, I thought I will take a crack at it, 
-Formulation: https://mathb.in/77182
+Formulation: https://mathb.in/77183
 
 
 Long story short simply throwing  entire problem  at SAT solver is not very efficient, probably 

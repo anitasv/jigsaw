@@ -16,7 +16,7 @@ import com.google.ortools.sat.CpSolverStatus;
  * Solves White Jigsaw Puzzles - meaning no image, only if information we have are the
  * shape of pieces.
  *
- * Formulation : https://mathb.in/77182
+ * Formulation : https://mathb.in/77183
  *
  * It can be run in two modes using Google OR Tools (default), or change code
  * to run using any model that accepts DIMACS file as input like MiniSAT. Later one
