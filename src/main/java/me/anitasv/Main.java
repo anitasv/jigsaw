@@ -184,7 +184,6 @@ public class Main {
         JigSaw jigSaw = new JigSaw(size, size);
         Piece[] B = jigSaw.shuffle();
 
-        Loader.loadNativeLibraries();
         GoogleModel model = new GoogleModel();
 
         int[][][] X = new int[jigSaw.M * jigSaw.N][jigSaw.M][jigSaw.N];
@@ -366,6 +365,8 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException {
+        Loader.loadNativeLibraries();
+
         for (int size = 1; size < 100; size++) {
             System.out.print("Solving: " + size);
             System.out.flush();
