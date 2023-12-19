@@ -41,12 +41,15 @@ public class Main {
         }
 
         JigsawSolver jigsawSolver = new JigsawSolver(M, N, B);
-        GoogleModel model = new GoogleModel();
+        CnfModel model = new CnfModel("Jigsaw " + M + "x" + N,
+                "/tmp/jig_rand_" + M + "x" + N + ".cnf");
         jigsawSolver.formulate(model);
         List<JigsawLocation> soln = jigsawSolver.solve(model);
 
-        for (int i = 0; i < withSoln.length; i++) {
-            System.out.println((i + 1) + ". " + L[i] + " -> " + soln.get(i));
+        if (soln != null) {
+            for (int i = 0; i < withSoln.length; i++) {
+                System.out.println((i + 1) + ". " + L[i] + " -> " + soln.get(i));
+            }
         }
     }
 
@@ -83,6 +86,7 @@ public class Main {
         if (N == null) {
             System.out.println("Argument N not found pass --N=[cols]");
         }
+
 
         if (randomProblem && M != null && N != null) {
             formulateAndSolve(M, N);

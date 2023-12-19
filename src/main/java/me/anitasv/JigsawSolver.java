@@ -170,25 +170,46 @@ public class JigsawSolver {
 
         JigSaw jigSaw = new JigSaw(M, N);
         List<JigsawLocation> locs = new ArrayList<>();
+        boolean hasError = false;
         for (int k = 0; k < M * jigSaw.N; k++) {
 
             int finalM = 0, finalN = 0;
+            boolean locFound = false;
             for (int m = 0; m < jigSaw.M; m++) {
                 for (int n = 0; n < jigSaw.N; n++) {
                     if (solution.contains(X[k][m][n])) {
                         finalM = m;
                         finalN = n;
-                        break;
+                        if (locFound) {
+                            System.out.println("Duplicate location!!");
+                            hasError = true;
+                        }
+                        locFound = true;
                     }
                 }
             }
+            if (!locFound) {
+                hasError = true;
+                System.out.println("Location not found");
+            }
             int finalS = 0;
+            boolean orientFound = false;
+
             for (int s = 0; s < SIDES; s++) {
                 if (solution.contains(Y[k][s])) {
                     finalS = s;
-                    break;
+                    if (orientFound) {
+                        System.out.println("Duplicate orientation!!");
+                        hasError = true;
+                    }
+                    orientFound = true;
                 }
             }
+            if (!orientFound) {
+                hasError = true;
+                System.out.println("Orientation not found");
+            }
+
 
             for (int s = 0; s < SIDES; s++) {
                 jigSaw.pieces[finalM][finalN].pokes[s]
@@ -197,8 +218,12 @@ public class JigsawSolver {
 
             locs.add(new JigsawLocation(finalM, finalN, finalS));
         }
-        System.out.println("Reconstituted Diagram:");
-        System.out.println(jigSaw);
-        return locs;
+        if (!hasError) {
+            System.out.println("Reconstituted Diagram:");
+            System.out.println(jigSaw);
+            return locs;
+        } else {
+            return null;
+        }
     }
 }

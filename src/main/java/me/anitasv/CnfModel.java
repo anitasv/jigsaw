@@ -2,6 +2,9 @@ package me.anitasv;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Set;
 
 class CnfModel implements SatModel {
@@ -112,6 +115,65 @@ class CnfModel implements SatModel {
 
     @Override
     public Set<Integer> solve() {
-        throw new UnsupportedOperationException("CNF Model doesn't implement solve yet");
+        try {
+            this.close();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        System.out.println("File Written");
+        ProcessBuilder concat = new ProcessBuilder("/bin/cat",
+                this.fileName + ".head",
+                this.fileName + ".tail");
+        concat.redirectOutput(new File(this.fileName));
+
+        try {
+            Process concatProcess = concat.start();
+            System.out.println("Waiting for concat");
+            int concatExit = concatProcess.waitFor();
+            if (concatExit != 0) {
+                throw new RuntimeException("/bin/cat failed with status: " + concatExit);
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("File Concatenated");
+
+        ProcessBuilder miniSat = new ProcessBuilder("/Users/anita/bin/bin/minisat",
+                this.fileName,
+                this.fileName + ".out");
+
+        miniSat.environment()
+                .put("DYLD_LIBRARY_PATH", "/Users/anita/bin/lib");
+
+        try {
+            Process miniProcess = miniSat.start();
+            System.out.println("Waiting for miniSAT");
+            miniProcess.waitFor();
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("miniSAT done");
+
+        String fileContents;
+        try {
+            fileContents = Files.readString(
+                    new File(this.fileName + ".out").toPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("Reading solution");
+
+        Set<Integer> solution = new HashSet<>();
+
+        String[] line2 = fileContents.split("\n")[1].split(" ");
+        for (String var : line2) {
+            int number = Integer.parseInt(var);
+            if (number > 0) {
+                solution.add(number);
+            }
+        }
+        System.out.println("Done parsing solution");
+        return solution;
     }
 }
