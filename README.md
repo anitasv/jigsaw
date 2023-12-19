@@ -16,7 +16,7 @@ It also possible to use this to generate a DIMACS cnf file, I implemented a vari
 [[Tseitin Transform]https://en.wikipedia.org/wiki/Tseytin_transformation] to make this, and performance
 using MiniSAT is worse than using OR Tools, but scales better. 
 
-TODO: A better formulation that doesn't take GB sized cnf files. 
-TODO: Use better SAT solvers like Glucose.
-TODO: Submit the problems to SAT competition 2023.
+* TODO: A better formulation that doesn't take GB sized cnf files. 
+* TODO: Use better SAT solvers like Glucose.
+* TODO: Submit the problems to SAT competition 2023.
 
