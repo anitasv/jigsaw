@@ -1,28 +1,64 @@
 package me.anitasv;
 
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 class CnfModel implements SatModel {
 
     // All these expressions must be simultaneously be true
-    private final List<int[]> cnf = new ArrayList<>();
+//    private final List<int[]> cnf = new ArrayList<>();
     private int variableIndex = 0;
+    private int numClauses = 0;
+
+    private final String title;
+    private final PrintWriter printWriter;
+    private final String fileName;
+
+
+    /**
+     * Writes the clauses to the file as it gets excecuted incrementally to avoid
+     * taking too much JVM space.
+     *
+     * Will create two files:
+     *   fileName.head
+     *   fileName.tail
+     *
+     * To finish writing call close() function.
+     *
+     * Make sure to call
+     *  `cat $fileName.head $fileName.tail > $fileName`
+     *
+     * once done before calling your SAT solver.
+     */
+    public CnfModel(String title,
+                    String fileName) throws FileNotFoundException {
+
+        FileOutputStream tailStream = new FileOutputStream(fileName + ".tail");
+        this.printWriter = new PrintWriter(tailStream, true, StandardCharsets.UTF_8);
+        this.fileName = fileName;
+        this.title = title;
+    }
+
+    private void writeClause(int[] literals) {
+        StringBuilder line = new StringBuilder();
+        for (int c : literals) {
+            line.append(c);
+            line.append(" ");
+        }
+        line.append("0");
+        printWriter.println(line);
+        ++numClauses;
+    }
 
     public void addExactlyOne(int[] literals) {
         if (literals.length == 1) {
-            cnf.add(literals);
+            writeClause(literals);
             return;
         }
 
         // Tseitin Transform
         int phi = newVariable("ignore");
-        cnf.add(new int[]{phi});
+        writeClause(new int[]{phi});
 
         int[] terms = new int[literals.length];
         for (int i = 0; i < literals.length; i++) {
@@ -32,10 +68,10 @@ class CnfModel implements SatModel {
         int[] phiTerm = new int[1 + terms.length];
         phiTerm[0] = -phi;
         System.arraycopy(terms, 0, phiTerm, 1, terms.length);
-        cnf.add(phiTerm);
+        writeClause(phiTerm);
 
         for (int term : terms) {
-            cnf.add(new int[]{phi, -term});
+            writeClause(new int[]{phi, -term});
         }
 
         for (int i = 0; i < terms.length; i++) {
@@ -44,43 +80,29 @@ class CnfModel implements SatModel {
             for (int j = 0; j < literals.length; j++) {
                 xCons[1 + j] = i == j ? -literals[j] : literals[j];
             }
-            cnf.add(xCons);
+            writeClause(xCons);
 
             for (int j = 0; j < literals.length; j++) {
-                cnf.add(new int[]{-terms[0], (i == j ? literals[j] : -literals[j])});
+                writeClause(new int[]{-terms[0], (i == j ? literals[j] : -literals[j])});
             }
         }
     }
 
     public void addBoolOr(int[] lhs) {
-        cnf.add(lhs);
+        writeClause(lhs);
     }
 
-    public void write(String title,
-                      OutputStream out) throws IOException {
+    public void close() throws FileNotFoundException {
+        printWriter.close();
 
-
-        int numLines = cnf.size();
-
-        BufferedOutputStream bos = new BufferedOutputStream(out, 1024 * 1024);
-        PrintWriter printWriter = new PrintWriter(bos, true, StandardCharsets.UTF_8);
-        printWriter.println("c");
-        printWriter.println("c Title: " + title);
-        printWriter.println("c");
-        printWriter.println("p cnf " + variableIndex + " " + numLines);
-
-        for (int[] constraint : cnf) {
-            StringBuilder line = new StringBuilder();
-            for (int c : constraint) {
-                line.append(c);
-                line.append(" ");
-            }
-            line.append("0");
-            printWriter.println(line);
-        }
-        printWriter.flush();
-        bos.flush();
-        out.flush();
+        FileOutputStream headStream = new FileOutputStream(fileName + ".head");
+        PrintWriter headWriter = new PrintWriter(headStream, true, StandardCharsets.UTF_8);
+        headWriter.println("c");
+        headWriter.println("c Title: " + title);
+        headWriter.println("c");
+        // Due to this header I cannot build an incremental writer which doesn't take exce
+        headWriter.println("p cnf " + variableIndex + " " + numClauses);
+        headWriter.close();
     }
 
     public int newVariable(String name) {

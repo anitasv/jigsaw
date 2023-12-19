@@ -61,9 +61,7 @@ public class Main {
     static class Piece  {
         private final Poke[] pokes = new Poke[SIDES];
         public Piece() {
-            for (int i = 0; i < SIDES; i++) {
-                this.pokes[i] = Poke.FLAT;
-            }
+            Arrays.fill(this.pokes, Poke.FLAT);
         }
     }
 
@@ -184,7 +182,8 @@ public class Main {
         JigSaw jigSaw = new JigSaw(size, size);
         Piece[] B = jigSaw.shuffle();
 
-        GoogleModel model = new GoogleModel();
+        CnfModel model = new CnfModel("Jigsaw " + size + "x" + size,
+                "/tmp/jigsaw_" + size + "x" + size + ".cnf");
 
         int[][][] X = new int[jigSaw.M * jigSaw.N][jigSaw.M][jigSaw.N];
         int[][] Y = new int[jigSaw.M * jigSaw.N][SIDES];
@@ -324,11 +323,13 @@ public class Main {
             }
         }
 
-        CpModel cpModel = model.getInternalModel();
-        //  Create a solver and solve the model.
-        CpSolver solver = new CpSolver();
-        CpSolverStatus status = solver.solve(cpModel);
+        model.close();
 
+//        CpModel cpModel = model.getInternalModel();
+//        //  Create a solver and solve the model.
+//        CpSolver solver = new CpSolver();
+//        CpSolverStatus status = solver.solve(cpModel);
+//
 //        if (status == CpSolverStatus.OPTIMAL || status == CpSolverStatus.FEASIBLE) {
 //
 //            JigSaw jigSawRecons = new JigSaw(jigSaw.M, jigSaw.N);
@@ -361,7 +362,7 @@ public class Main {
 //        } else {
 //            System.out.println("No solution found.");
 //        }
-        return status.toString();
+        return "written";
     }
 
     public static void main(String[] args) throws IOException {
