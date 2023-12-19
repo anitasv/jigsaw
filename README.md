@@ -13,7 +13,7 @@ more efficient. But for size 11x11 it was solving within minutes, larger ones li
 out of JVM memory (16GB).
 
 It also possible to use this to generate a DIMACS cnf file, I implemented a variant of 
-[[Tseitin Transform]https://en.wikipedia.org/wiki/Tseytin_transformation] to make this, and performance
+[Tseitin Transform](https://en.wikipedia.org/wiki/Tseytin_transformation) to make this, and performance
 using MiniSAT is worse than using OR Tools, but scales better. 
 
 * TODO: A better formulation that doesn't take GB sized cnf files. 
