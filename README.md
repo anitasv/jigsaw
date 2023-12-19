@@ -24,65 +24,109 @@ java -jar target/jigsaw-1.0-SNAPSHOT.jar --random --M=5 --N=5
 Sample Output:
 ```
 Using random jigsaw puzzle
+Argument --sat_solver_path=[path] missing, using Google OR Tools
 Source diagram:
-   -      -      -      -      -
-|     <<     <<     >>     >>     |
-   ^      V      ^      ^      V
-   ^      V      ^      ^      V
-|     >>     <<     >>     >>     |
-   V      ^      V      ^      V
-   V      ^      V      ^      V
-|     >>     <<     >>     <<     |
-   V      V      ^      ^      ^
-   V      V      ^      ^      ^
-|     <<     >>     <<     <<     |
-   ^      V      ^      V      ^
-   ^      V      ^      V      ^
-|     >>     <<     <<     >>     |
-   -      -      -      -      -
+   -      -      -
+|     <<     <<     |
+   V      ^      V
+   V      ^      V
+|     >>     <<     |
+   V      ^      ^
+   V      ^      ^
+|     <<     <<     |
+   -      -      -
 
 Reconstituted Diagram:
-   -      -      -      -      -
-|     >>     >>     <<     <<     |
-   V      ^      ^      V      ^
-   V      ^      ^      V      ^
-|     >>     >>     <<     <<     |
-   ^      V      V      ^      ^
-   ^      V      V      ^      ^
-|     >>     <<     <<     >>     |
-   ^      ^      ^      V      V
-   ^      ^      ^      V      V
-|     >>     <<     <<     >>     |
-   V      V      ^      V      V
-   V      V      ^      V      V
-|     <<     >>     >>     <<     |
-   -      -      -      -      -
+   -      -      -
+|     <<     <<     |
+   ^      V      V
+   ^      V      V
+|     >>     <<     |
+   ^      V      ^
+   ^      V      ^
+|     >>     >>     |
+   -      -      -
 
-1. (2,3,0) -> (1,1,1)
-2. (0,1,3) -> (0,2,1)
-3. (0,3,2) -> (1,0,3)
-4. (1,0,2) -> (1,4,0)
-5. (0,2,1) -> (3,4,2)
-6. (3,4,2) -> (4,2,1)
-7. (2,4,0) -> (0,3,1)
-8. (3,2,0) -> (2,1,1)
-9. (3,0,0) -> (4,3,1)
-10. (0,4,2) -> (0,0,3)
-11. (4,2,2) -> (0,1,0)
-12. (0,0,2) -> (4,0,3)
-13. (2,2,1) -> (3,1,0)
-14. (3,3,0) -> (2,3,3)
-15. (1,4,2) -> (3,0,0)
-16. (2,0,2) -> (4,1,3)
-17. (2,1,0) -> (1,3,0)
-18. (1,3,3) -> (1,2,0)
-19. (3,1,1) -> (3,2,0)
-20. (1,1,3) -> (2,2,0)
-21. (4,3,2) -> (2,4,3)
-22. (1,2,3) -> (3,3,0)
-23. (4,0,1) -> (4,4,0)
-24. (4,4,3) -> (0,4,2)
-25. (4,1,1) -> (2,0,2)
+1. (1,0,1) -> (0,1,2)
+2. (0,1,3) -> (2,1,3)
+3. (2,1,0) -> (1,0,3)
+4. (2,0,3) -> (0,0,0)
+5. (1,1,0) -> (1,1,2)
+6. (2,2,0) -> (2,0,3)
+7. (0,2,3) -> (0,2,1)
+8. (1,2,1) -> (1,2,3)
+9. (0,0,2) -> (2,2,0)
+```
+
+You can also use any SAT solver that accepts cnf files. 
+```shell
+java -jar target/jigsaw-1.0-SNAPSHOT.jar \
+  --random --M=3 --N=3 \
+  --sat_solver_path=/Users/anita/bin/bin/minisat
+```
+
+```
+Using random jigsaw puzzle
+Source diagram:
+   -      -      -
+|     >>     >>     |
+   ^      ^      V
+   ^      ^      V
+|     >>     >>     |
+   V      ^      ^
+   V      ^      ^
+|     >>     <<     |
+   -      -      -
+
+File Written
+Waiting for concat
+File Concatenated
+Waiting for miniSAT
+============================[ Problem Statistics ]=============================
+|                                                                             |
+|  Number of variables:           315                                         |
+|  Number of clauses:           12483                                         |
+|  Parse time:                   0.00 s                                       |
+|  Eliminated clauses:           0.00 Mb                                      |
+|  Simplification time:          0.01 s                                       |
+|                                                                             |
+============================[ Search Statistics ]==============================
+| Conflicts |          ORIGINAL         |          LEARNT          | Progress |
+|           |    Vars  Clauses Literals |    Limit  Clauses Lit/Cl |          |
+===============================================================================
+===============================================================================
+restarts              : 1
+conflicts             : 0              (0 /sec)
+decisions             : 11             (0.00 % random) (1098 /sec)
+propagations          : 234            (23358 /sec)
+conflict literals     : 0              ( nan % deleted)
+Memory used           : 5.76 MB
+CPU time              : 0.010018 s
+
+SATISFIABLE
+miniSAT done
+Reading solution
+Done parsing solution
+Reconstituted Diagram:
+   -      -      -
+|     >>     >>     |
+   ^      ^      V
+   ^      ^      V
+|     >>     >>     |
+   V      ^      ^
+   V      ^      ^
+|     >>     <<     |
+   -      -      -
+
+1. (1,1,3) -> (1,1,1)
+2. (0,0,2) -> (0,2,1)
+3. (1,2,0) -> (1,2,0)
+4. (2,2,2) -> (2,2,2)
+5. (0,1,3) -> (0,1,1)
+6. (0,2,3) -> (0,0,2)
+7. (2,0,2) -> (2,0,2)
+8. (2,1,3) -> (2,1,1)
+9. (1,0,0) -> (1,0,0)
 ```
 
 * TODO: Take custom user pieces instead of random.

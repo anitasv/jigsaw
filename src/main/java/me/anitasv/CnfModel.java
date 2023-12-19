@@ -18,6 +18,7 @@ class CnfModel implements SatModel {
     private final PrintWriter printWriter;
     private final String fileName;
 
+    private final String satSolverPath;
 
     /**
      * Writes the clauses to the file as it gets excecuted incrementally to avoid
@@ -35,12 +36,14 @@ class CnfModel implements SatModel {
      * once done before calling your SAT solver.
      */
     public CnfModel(String title,
-                    String fileName) throws FileNotFoundException {
+                    String fileName,
+                    String satSolverPath) throws FileNotFoundException {
 
         FileOutputStream tailStream = new FileOutputStream(fileName + ".tail");
         this.printWriter = new PrintWriter(tailStream, true, StandardCharsets.UTF_8);
         this.fileName = fileName;
         this.title = title;
+        this.satSolverPath = satSolverPath;
     }
 
     private void writeClause(int[] literals) {
@@ -130,12 +133,10 @@ class CnfModel implements SatModel {
         }
         System.out.println("File Concatenated");
 
-        ProcessBuilder miniSat = new ProcessBuilder("/Users/anita/bin/bin/minisat",
+        ProcessBuilder miniSat = new ProcessBuilder(satSolverPath,
                 this.fileName,
-                this.fileName + ".out");
-
-        miniSat.environment()
-                .put("DYLD_LIBRARY_PATH", "/Users/anita/bin/lib");
+                this.fileName + ".out")
+                .inheritIO();
 
         try {
             Process miniProcess = miniSat.start();

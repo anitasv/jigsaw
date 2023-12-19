@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class Main {
 
-    private static void formulateAndSolve(int M, int N) throws IOException {
+    private static void formulateAndSolve(int M, int N, SatModel model) throws IOException {
         JigSaw jigSaw = new JigSaw(M, N);
         System.out.println("Source diagram:");
         System.out.println(jigSaw);
@@ -41,23 +41,21 @@ public class Main {
         }
 
         JigsawSolver jigsawSolver = new JigsawSolver(M, N, B);
-        CnfModel model = new CnfModel("Jigsaw " + M + "x" + N,
-                "/tmp/jig_rand_" + M + "x" + N + ".cnf");
-        jigsawSolver.formulate(model);
-        List<JigsawLocation> soln = jigsawSolver.solve(model);
 
-        if (soln != null) {
+        jigsawSolver.formulate(model);
+        List<JigsawLocation> solution = jigsawSolver.solve(model);
+
+        if (solution != null) {
             for (int i = 0; i < withSoln.length; i++) {
-                System.out.println((i + 1) + ". " + L[i] + " -> " + soln.get(i));
+                System.out.println((i + 1) + ". " + L[i] + " -> " + solution.get(i));
             }
         }
     }
 
     public static void main(String[] args) throws IOException {
-        Loader.loadNativeLibraries();
-
         boolean randomProblem = false;
         Integer M = null, N = null;
+        String satSolverPath = null;
         for (String arg : args) {
             if (arg.equals("--random")) {
                 randomProblem = true;
@@ -73,6 +71,8 @@ public class Main {
                 } catch (NumberFormatException e) {
                     System.out.println("N value: " + e.getMessage());
                 }
+            } else if (arg.startsWith("--sat_solver_path=")) {
+                satSolverPath = arg.substring("--sat_solver_path=".length());
             }
         }
         if (randomProblem) {
@@ -89,7 +89,18 @@ public class Main {
 
 
         if (randomProblem && M != null && N != null) {
-            formulateAndSolve(M, N);
+            SatModel model;
+
+            if (satSolverPath == null) {
+                System.out.println("Argument --sat_solver_path=[path] missing, using Google OR Tools");
+                Loader.loadNativeLibraries();
+                model = new GoogleModel();
+            } else {
+                model = new CnfModel("Jigsaw " + M + "x" + N,
+                        "/tmp/jig_rand_" + M + "x" + N + ".cnf",
+                        satSolverPath);
+            }
+            formulateAndSolve(M, N, model);
         } else {
             System.exit(1);
         }
