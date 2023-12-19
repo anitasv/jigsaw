@@ -8,8 +8,7 @@ Formulation: https://mathb.in/77183
 
 Long story short simply throwing  entire problem  at SAT solver is not very efficient, probably 
 solving edges first and moving in in separate steps and hints with a solver might be
-more efficient. But for size 11x11 it was solving within minutes, larger ones like 32x32 runs
-out of JVM memory (16GB).
+more efficient. For larger than 10x10 use external sat solver, see result of 12x12 in [RUNS)(./RUNS.md).
 
 It also possible to use this to generate a DIMACS cnf file, I implemented a variant of 
 [Tseitin Transform](https://en.wikipedia.org/wiki/Tseytin_transformation) to make this, and performance
