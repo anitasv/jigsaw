@@ -61,33 +61,24 @@ class CnfModel implements SatModel {
         }
 
         // Tseitin Transform
-        int phi = newVariable("ignore");
-        writeClause(new int[]{phi});
 
         int[] terms = new int[literals.length];
         for (int i = 0; i < literals.length; i++) {
             terms[i] = newVariable("ignore");
         }
 
-        int[] phiTerm = new int[1 + terms.length];
-        phiTerm[0] = -phi;
-        System.arraycopy(terms, 0, phiTerm, 1, terms.length);
-        writeClause(phiTerm);
-
-        for (int term : terms) {
-            writeClause(new int[]{phi, -term});
-        }
+        writeClause(terms);
 
         for (int i = 0; i < terms.length; i++) {
             int[] xCons = new int[1 + literals.length];
-            xCons[0] = terms[0];
+            xCons[0] = terms[i];
             for (int j = 0; j < literals.length; j++) {
                 xCons[1 + j] = i == j ? -literals[j] : literals[j];
             }
             writeClause(xCons);
 
             for (int j = 0; j < literals.length; j++) {
-                writeClause(new int[]{-terms[0], (i == j ? literals[j] : -literals[j])});
+                writeClause(new int[]{-terms[i], (i == j ? literals[j] : -literals[j])});
             }
         }
     }
