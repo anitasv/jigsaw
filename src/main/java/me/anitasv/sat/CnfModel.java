@@ -1,7 +1,5 @@
 package me.anitasv.sat;
 
-import me.anitasv.sat.SatModel;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -11,7 +9,6 @@ import java.util.Set;
 public class CnfModel implements SatModel {
 
     // All these expressions must be simultaneously be true
-//    private final List<int[]> cnf = new ArrayList<>();
     private int variableIndex = 0;
     private int numClauses = 0;
 

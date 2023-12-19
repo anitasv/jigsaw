@@ -1,7 +1,6 @@
 package me.anitasv.sat;
 
 import com.google.ortools.sat.*;
-import me.anitasv.sat.SatModel;
 
 import java.util.ArrayList;
 import java.util.HashSet;
