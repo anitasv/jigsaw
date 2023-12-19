@@ -2,6 +2,7 @@ package me.anitasv;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 
 class CnfModel implements SatModel {
 
@@ -107,5 +108,10 @@ class CnfModel implements SatModel {
 
     public int newVariable(String name) {
         return ++variableIndex;
+    }
+
+    @Override
+    public Set<Integer> solve() {
+        throw new UnsupportedOperationException("CNF Model doesn't implement solve yet");
     }
 }
