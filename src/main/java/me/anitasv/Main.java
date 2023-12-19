@@ -46,7 +46,7 @@ public class Main {
         List<JigsawLocation> soln = jigsawSolver.solve(model);
 
         for (int i = 0; i < withSoln.length; i++) {
-            System.out.println((i + 1) + " og: " + L[i] + " ne:" + soln.get(i));
+            System.out.println((i + 1) + ". " + L[i] + " -> " + soln.get(i));
         }
     }
 
