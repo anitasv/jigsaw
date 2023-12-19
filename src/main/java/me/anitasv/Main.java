@@ -1,16 +1,36 @@
 package me.anitasv;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.google.ortools.Loader;
-//import com.google.ortools.sat.*;
+import com.google.ortools.sat.CpModel;
+import com.google.ortools.sat.CpSolver;
+import com.google.ortools.sat.CpSolverStatus;
 
 
+/**
+ * Solves White Jigsaw Puzzles - meaning no image, only if information we have are the
+ * shape of pieces.
+ *
+ * Formulation : https://mathb.in/77182
+ *
+ * It can be run in two modes using Google OR Tools (default), or change code
+ * to run using any model that accepts DIMACS file as input like MiniSAT. Later one
+ * is more scalable because it won't die because of JVM limits.
+ *
+ * MiniSat specifically is not better than Google OR Tools, and printing back
+ * the solution is currently not supported, only creating the file and you have
+ * to manually invoke the tool you like. Using Glucose may be better but I can't
+ * get it to run on Mac M2 silicon.
+ *
+ * To create DIMACS file I implemented a variant of Tseitin Transform for "exactly one"
+ * constraints. This may be what is causing poor MiniSat performance in comparison
+ * to OR Tools, because OR tools directly work out of the circuit in SMT solver.
+ */
 public class Main {
 
     enum Poke {
@@ -160,93 +180,12 @@ public class Main {
         }
     }
 
-    static class CnfModel {
-
-        // All these expressions must be simultaneously be true
-        private final List<int[]> cnf = new ArrayList<>();
-        private int variableIndex = 0;
-
-        public void addExactlyOne(int[] literals) {
-            if (literals.length == 1) {
-                cnf.add(literals);
-                return;
-            }
-
-            // Tseitin Transform
-            int phi = newVariable();
-            cnf.add(new int[]{phi});
-
-            int[] terms = new int[literals.length];
-            for (int i = 0; i < literals.length; i++) {
-                terms[i] = newVariable();
-            }
-
-            int[] phiTerm = new int[1 + terms.length];
-            phiTerm[0] = -phi;
-            System.arraycopy(terms, 0, phiTerm, 1, terms.length);
-            cnf.add(phiTerm);
-
-            for (int term : terms) {
-                cnf.add(new int[]{phi, -term});
-            }
-
-            for (int i = 0; i < terms.length; i++) {
-                int[] xCons = new int[1 + literals.length];
-                xCons[0] = terms[0];
-                for (int j = 0; j < literals.length; j++) {
-                    xCons[1 + j] = i == j ? -literals[j] : literals[j];
-                }
-                cnf.add(xCons);
-
-                for (int j = 0; j < literals.length; j++) {
-                    cnf.add(new int[]{-terms[0], (i == j ? literals[j] : -literals[j])});
-                }
-            }
-        }
-
-        public void addBoolOr(int[] lhs) {
-            cnf.add(lhs);
-        }
-
-        // finalExpr = AND(orExpr) ^ OR(AndExpr)
-        public void write(String title,
-                          OutputStream out) throws IOException {
-
-
-            int numLines = cnf.size();
-
-            BufferedOutputStream bos = new BufferedOutputStream(out, 1024 * 1024);
-            PrintWriter printWriter = new PrintWriter(bos, true, StandardCharsets.UTF_8);
-            printWriter.println("c");
-            printWriter.println("c Title: " +title);
-            printWriter.println("c");
-            printWriter.println("p cnf " + variableIndex + " " + numLines);
-
-            for (int[] constraint : cnf) {
-                StringBuilder line = new StringBuilder();
-                for (int c : constraint) {
-                    line.append(c);
-                    line.append(" ");
-                }
-                line.append("0");
-                printWriter.println(line);
-            }
-            printWriter.flush();
-            bos.flush();
-            out.flush();
-        }
-
-        public int newVariable() {
-            return ++variableIndex;
-        }
-    }
-
-    private static String solve(int size) throws IOException {
+    private static String formulateAndSolve(int size) throws IOException {
         JigSaw jigSaw = new JigSaw(size, size);
         Piece[] B = jigSaw.shuffle();
 
         Loader.loadNativeLibraries();
-        CnfModel model = new CnfModel();
+        GoogleModel model = new GoogleModel();
 
         int[][][] X = new int[jigSaw.M * jigSaw.N][jigSaw.M][jigSaw.N];
         int[][] Y = new int[jigSaw.M * jigSaw.N][SIDES];
@@ -257,14 +196,14 @@ public class Main {
         for (int k = 0; k < tot; k++) {
             for (int m = 0; m < jigSaw.M; m++) {
                 for (int n = 0; n < jigSaw.N; n++) {
-                    X[k][m][n] = model.newVariable();
+                    X[k][m][n] = model.newVariable("X_{" + k + "," + m + "," + n + "}");
                 }
             }
         }
 
         for (int k = 0; k < tot; k++) {
             for (int s = 0; s < SIDES; s++) {
-                Y[k][s] = model.newVariable();
+                Y[k][s] = model.newVariable("X_{" + k + "," + s + "}");
             }
         }
 
@@ -386,18 +325,11 @@ public class Main {
             }
         }
 
-        FileOutputStream fos = new FileOutputStream("/tmp/jigsaw" + "_" + size + ".cnf");
+        CpModel cpModel = model.getInternalModel();
+        //  Create a solver and solve the model.
+        CpSolver solver = new CpSolver();
+        CpSolverStatus status = solver.solve(cpModel);
 
-        model.write("Jigsaw : " + size + "x" + size,
-                fos);
-
-        return "do stuff";
-
-        // Create a solver and solve the model.
-//        CpSolver solver = new CpSolver();
-//        CpSolverStatus status = solver.solve(model);
-//
-//        return status.toString();
 //        if (status == CpSolverStatus.OPTIMAL || status == CpSolverStatus.FEASIBLE) {
 //
 //            JigSaw jigSawRecons = new JigSaw(jigSaw.M, jigSaw.N);
@@ -406,7 +338,7 @@ public class Main {
 //                int finalM = 0, finalN = 0;
 //                for (int m = 0; m < jigSaw.M; m++) {
 //                    for (int n = 0; n < jigSaw.N; n++) {
-//                        if (solver.booleanValue(X[k][m][n])) {
+//                        if (solver.booleanValue(model.getInternalVar(X[k][m][n]))) {
 //                            finalM = m;
 //                            finalN = n;
 //                            break;
@@ -415,7 +347,7 @@ public class Main {
 //                }
 //                int finalS = 0;
 //                for (int s = 0; s < SIDES; s++) {
-//                    if (solver.booleanValue(Y[k][s])) {
+//                    if (solver.booleanValue(model.getInternalVar(Y[k][s]))) {
 //                        finalS = s;
 //                        break;
 //                    }
@@ -430,6 +362,7 @@ public class Main {
 //        } else {
 //            System.out.println("No solution found.");
 //        }
+        return status.toString();
     }
 
     public static void main(String[] args) throws IOException {
@@ -437,9 +370,12 @@ public class Main {
             System.out.print("Solving: " + size);
             System.out.flush();
             long startNanos = System.nanoTime();
-            String status = solve(size);
+
+            String status = formulateAndSolve(size);
+
             long endNanos = System.nanoTime();
-            System.out.println(" " + status + " took: " + (TimeUnit.NANOSECONDS.toSeconds(endNanos - startNanos))
+            System.out.println(" " + status + " took: " +
+                    (TimeUnit.NANOSECONDS.toSeconds(endNanos - startNanos))
                     + " seconds");
             System.gc();
         }
