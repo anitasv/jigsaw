@@ -7,14 +7,14 @@ Using random jigsaw puzzle
 Source diagram:
    -      -      -      -      -      -      -      -      -      -      -      -
 |     <<     <<     >>     >>     >>     >>     <<     >>     <<     >>     >>     |
-^      ^      ^      ^      ^      ^      V      V      V      V      V      ^
-^      ^      ^      ^      ^      ^      V      V      V      V      V      ^
+   ^      ^      ^      ^      ^      ^      V      V      V      V      V      ^
+   ^      ^      ^      ^      ^      ^      V      V      V      V      V      ^
 |     >>     <<     >>     <<     <<     <<     >>     <<     <<     >>     >>     |
-V      ^      V      V      V      V      V      V      ^      ^      ^      ^
-V      ^      V      V      V      V      V      V      ^      ^      ^      ^
+   V      ^      V      V      V      V      V      V      ^      ^      ^      ^
+   V      ^      V      V      V      V      V      V      ^      ^      ^      ^
 |     <<     >>     <<     <<     >>     >>     <<     <<     <<     <<     <<     |
-^      V      ^      ^      ^      ^      ^      V      ^      ^      V      ^
-^      V      ^      ^      ^      ^      ^      V      ^      ^      V      ^
+   ^      V      ^      ^      ^      ^      ^      V      ^      ^      V      ^
+  ^      V      ^      ^      ^      ^      ^      V      ^      ^      V      ^
 |     >>     <<     <<     <<     <<     >>     >>     >>     <<     <<     >>     |
 ^      V      V      V      ^      ^      ^      V      V      V      V      V
 ^      V      V      V      ^      ^      ^      V      V      V      V      V

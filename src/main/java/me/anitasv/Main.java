@@ -28,7 +28,7 @@ public class Main {
             L[i] = withSoln[i].loc();
         }
 
-        JigsawSolver jigsawSolver = new JigsawSolver(M, N, B);
+        JigsawSolver2 jigsawSolver = new JigsawSolver2(M, N, B);
 
         System.out.println("Formulating SAT problem.");
         jigsawSolver.formulate(model);
