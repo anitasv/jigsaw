@@ -3,12 +3,13 @@
 Solves White jigsaw puzzles, inspired by the video by Stuff Made Here:
 https://www.youtube.com/watch?v=Gu_1S77XkiM and https://www.youtube.com/watch?v=WsPHBD5NsS0 
 
-Formulation: https://mathb.in/77183
+Formulation (OLD): https://mathb.in/77183  ~ O(n^4) variables.
+Formulation (NEW): https://mathb.in/77190  ~ O(n^2) variables. 
 
+Long story short. Old formulation 10x10 was fast enough to run in a few minutes, 13x13 took hours.
+New formulation 13x13 takes around 30 seconds. 
 
-Long story short simply throwing  entire problem  at SAT solver is not very efficient, probably 
-solving edges first and moving in in separate steps and hints with a solver might be
-more efficient. For larger than 10x10 use external sat solver, see result of 12x12 in [RUNS](./RUNS.md).
+See a sample result of 12x12 in [RUNS](./RUNS.md).
 
 It also possible to use this to generate a DIMACS cnf file, I implemented a variant of 
 [Tseitin Transform](https://en.wikipedia.org/wiki/Tseytin_transformation) to make this, and performance
