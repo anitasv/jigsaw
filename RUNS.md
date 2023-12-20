@@ -98,3 +98,15 @@ Source diagram:
    -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -      -   
 
 Formulating SAT problem.
+Files Written.
+Waiting for concat.
+File Concatenated.
+SAT input: /var/folders/wn/3mb3fgvn4zbc62xy4tl_yrph0000gn/T/jig_rand_32x32.1559278196179841399.cnf
+SAT output: /var/folders/wn/3mb3fgvn4zbc62xy4tl_yrph0000gn/T/jig_rand_32x32.9009284000269303846.out
+Waiting for SAT solver.
+============================[ Problem Statistics ]=============================
+|                                                                             |
+===============================================================================
+INDETERMINATE
+SAT solver done
+Reading solution.

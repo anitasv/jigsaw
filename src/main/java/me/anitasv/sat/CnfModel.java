@@ -10,7 +10,7 @@ public class CnfModel implements SatModel {
 
     // All these expressions must be simultaneously be true
     private int variableIndex = 0;
-    private int numClauses = 0;
+    private long numClauses = 0;
 
     private final String title;
     private final PrintWriter printWriter;
@@ -19,7 +19,6 @@ public class CnfModel implements SatModel {
     private final String satSolverPath;
     private final File headFile;
     private final File tailFile;
-
 
     /**
      * Writes the clauses to the file as it gets excecuted incrementally to avoid
