@@ -30,7 +30,7 @@ public class JigsawSolver {
         this.Y = new int[tot][SIDES];
     }
 
-    public void formulate(SatModel model) throws FileNotFoundException {
+    public void formulate(SatModel model) {
         for (int k = 0; k < tot; k++) {
             for (int m = 0; m < M; m++) {
                 for (int n = 0; n < N; n++) {
