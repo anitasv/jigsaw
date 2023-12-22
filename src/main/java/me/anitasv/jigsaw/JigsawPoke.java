@@ -13,15 +13,10 @@ public enum JigsawPoke {
 
 
     public JigsawPoke flip() {
-        switch (this) {
-            case FLAT:
-                return JigsawPoke.FLAT;
-            case IN:
-                return JigsawPoke.OUT;
-            case OUT:
-                return JigsawPoke.IN;
-            default:
-                return this;
-        }
+        return switch (this) {
+            case FLAT -> JigsawPoke.FLAT;
+            case IN -> JigsawPoke.OUT;
+            case OUT -> JigsawPoke.IN;
+        };
     }
 }
