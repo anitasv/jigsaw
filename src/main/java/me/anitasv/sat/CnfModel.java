@@ -59,38 +59,45 @@ public class CnfModel implements SatModel {
         ++numClauses;
     }
 
-    public void addExactlyOne(int[] literals) {
+    private void addExactlyOneMyOG(int[] literals) {
         if (literals.length == 1) {
             writeClause(literals);
             return;
         }
-
         // Tseitin Transform
+        int[] terms = new int[literals.length];
+        for (int i = 0; i < literals.length; i++) {
+            terms[i] = newVariable("ignore");
+        }
+
+        writeClause(terms);
+
+        for (int i = 0; i < terms.length; i++) {
+            int[] xCons = new int[1 + literals.length];
+            xCons[0] = terms[i];
+            for (int j = 0; j < literals.length; j++) {
+                xCons[1 + j] = i == j ? -literals[j] : literals[j];
+            }
+            writeClause(xCons);
+
+            for (int j = 0; j < literals.length; j++) {
+                writeClause(new int[]{-terms[i], (i == j ? literals[j] : -literals[j])});
+            }
+        }
+    }
+
+    private void addExactlyOneComb(int[] literals) {
+        writeClause(literals);
+
         for (int i = 0; i < literals.length - 1; i++) {
             for (int j = i + 1; j < literals.length; j++) {
                 writeClause(new int[]{-literals[i], -literals[j]});
             }
         }
+    }
 
-//        int[] terms = new int[literals.length];
-//        for (int i = 0; i < literals.length; i++) {
-//            terms[i] = newVariable("ignore");
-//        }
-//
-//        writeClause(terms);
-//
-//        for (int i = 0; i < terms.length; i++) {
-//            int[] xCons = new int[1 + literals.length];
-//            xCons[0] = terms[i];
-//            for (int j = 0; j < literals.length; j++) {
-//                xCons[1 + j] = i == j ? -literals[j] : literals[j];
-//            }
-//            writeClause(xCons);
-//
-//            for (int j = 0; j < literals.length; j++) {
-//                writeClause(new int[]{-terms[i], (i == j ? literals[j] : -literals[j])});
-//            }
-//        }
+    public void addExactlyOne(int[] literals) {
+       addExactlyOneMyOG(literals);
     }
 
     public void addBoolOr(int[] lhs) {
