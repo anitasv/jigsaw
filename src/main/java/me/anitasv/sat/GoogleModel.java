@@ -24,10 +24,20 @@ public class GoogleModel implements SatModel {
     }
 
     @Override
+    public void addBoolAndImplies(int[] pre, int result) {
+        Literal[] googLiterals = new Literal[pre.length];
+        Literal resultLiteral = getInternalVar(result);
+        for (int i = 0; i < pre.length; i++) {
+            googLiterals[i] = getInternalVar(pre[i]);
+        }
+        model.addBoolOr(new Literal[]{resultLiteral})
+                .onlyEnforceIf(googLiterals);
+    }
+
+    @Override
     public int newVariable(String name) {
         variables.add(model.newBoolVar(name));
-        int idx = variables.size();
-        return idx;
+        return variables.size();
     }
 
     @Override
@@ -39,12 +49,23 @@ public class GoogleModel implements SatModel {
             for (int i = 1; i < variables.size() + 1; i++) {
                 if (cpSolver.booleanValue(getInternalVar(i))) {
                     trueValues.add(i);
+                } else {
+                    trueValues.add(-i);
                 }
             }
             return trueValues;
         } else {
             return null;
         }
+    }
+
+    @Override
+    public void addExactly(int[] selectCell, int sum) {
+        Literal[] literals = new Literal[selectCell.length];
+        for (int i = 0; i < literals.length; i++) {
+            literals[i] = getInternalVar(selectCell[i]);
+        }
+        model.addEquality(LinearExpr.sum(literals), sum);
     }
 
     public Literal[] getInternalLiterals(int[] literals) {

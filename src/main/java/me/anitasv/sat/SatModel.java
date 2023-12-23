@@ -24,6 +24,8 @@ public interface SatModel {
     void addBoolOr(int[] literals);
 
 
+    void addBoolAndImplies(int[] literals, int literal);
+
     /**
      * Adds a constraint that at exactly one of the literals must be true. This may
      * create multiple clauses in a CNF solver.
@@ -41,4 +43,6 @@ public interface SatModel {
      * @return set of true variables.
      */
     Set<Integer> solve();
+
+    void addExactly(int[] selectCell, int sum);
 }

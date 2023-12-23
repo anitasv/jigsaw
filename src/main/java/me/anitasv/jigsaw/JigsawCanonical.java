@@ -8,6 +8,7 @@ import java.util.*;
 public class JigsawCanonical {
 
     private final Map<List<JigsawPoke>, Integer> pieceIndex = new HashMap<>();
+    private final int size;
 
     public JigsawCanonical() {
         DisjointSet<List<JigsawPoke>> canonicals = new DisjointSet<>();
@@ -43,14 +44,21 @@ public class JigsawCanonical {
             List<JigsawPoke> canonical = canonicals.findCanonical(str);
             Integer currentIndex = knownRoots.get(canonical);
             if (currentIndex == null) {
-                currentIndex = ++nextIndex;
+                currentIndex = nextIndex;
                 knownRoots.put(canonical, currentIndex);
+                nextIndex++;
             }
-            pieceIndex.put(str, nextIndex);
+            pieceIndex.put(str, currentIndex);
         }
+        size = nextIndex;
     }
 
-    public int getCanonicalIndex(List<JigsawPoke> sides) {
-        return pieceIndex.get(sides);
+    public int getCanonicalIndex(JigsawPiece sides) {
+        return pieceIndex.get(Arrays.asList(sides.pokes));
     }
+
+    public int size() {
+        return size;
+    }
+
 }

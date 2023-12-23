@@ -8,9 +8,13 @@ https://www.youtube.com/watch?v=Gu_1S77XkiM and https://www.youtube.com/watch?v=
 |-----------------------------|---------------------|-------------------|
 | [1](https://mathb.in/77183) | n^2 + 4n            | 48n^4 + n^2 + n   |
 | [2](https://mathb.in/77190) | n^2 + 6n            | 16n^2 + 4n        |
+| [3](https://mathb.in/77209) | 26n                 | O(n log(n))       |
 
-Long story short. Old formulation 10x10 was fast enough to run in a few minutes, 
-13x13 took hours and 100s of GB of memory. New formulation 13x13 takes around 30 seconds. 
+Long story short. Formulation 1 10x10 was fast enough to run in a few minutes, 
+13x13 took hours and 100s of GB of memory. Formulation 2, 13x13 takes around 30 seconds,
+largest I can run is about 18x18. Formulation 3, I can run 32x32 in just 2-3 seconds. I
+think we have finally reached the limit of this.
+
 
 See a sample result of 13x13 in [RUNS](./RUNS.md).
 
