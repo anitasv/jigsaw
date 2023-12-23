@@ -330,10 +330,8 @@ public class CnfModel implements SatModel {
         String[] line2 = fileContents.split("\n")[1].split(" ");
         for (String var : line2) {
             int number = Integer.parseInt(var);
-            if (number > 0) {
+            if (number != 0) {
                 solution.add(number);
-            } else if (number < 0) {
-                solution.add(-number);
             }
         }
         System.out.println("Done parsing solution.");

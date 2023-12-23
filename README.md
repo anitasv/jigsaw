@@ -1,8 +1,9 @@
+## Introduction
 
-
-Solves White jigsaw puzzles, inspired by the video by Stuff Made Here:
-https://www.youtube.com/watch?v=Gu_1S77XkiM and https://www.youtube.com/watch?v=WsPHBD5NsS0 
-
+Solves White jigsaw puzzles, which means there is no picture or anything on each piece.
+Also assuming all tabs and pockets fit each other. Due to 
+[Paper](https://erikdemaine.org/papers/Jigsaw_GC/paper.pdf) we know these are NP complete.
+This project tries to formulate a SAT / SMT problem which can be solved 
 
 | Formulation                 | Number of Variables | Number of Clauses |
 |-----------------------------|---------------------|-------------------|
@@ -10,133 +11,40 @@ https://www.youtube.com/watch?v=Gu_1S77XkiM and https://www.youtube.com/watch?v=
 | [2](https://mathb.in/77190) | n^2 + 6n            | 16n^2 + 4n        |
 | [3](https://mathb.in/77209) | 26n                 | O(n log(n))       |
 
-Long story short. Formulation 1 10x10 was fast enough to run in a few minutes, 
+Long story short. In Formulation 1, 10x10 was fast enough to run in a few minutes, 
 13x13 took hours and 100s of GB of memory. Formulation 2, 13x13 takes around 30 seconds,
 largest I can run is about 18x18. Formulation 3, I can run 32x32 in just 2-3 seconds. I
 think we have finally reached the limit of this. 64x64 runs in 283 seconds. 70x72 (5040 piece)
 puzzle took about 9 minutes.
 
-See a sample result of 13x13 in [RUNS](./RUNS.md).
+There are two supported solvers, one is [Google OR Tools](https://developers.google.com/optimization), 
+and other is [MiniSAT](http://minisat.se/). In fact I support any tool like MiniSAT that takes 
+input as a [DIMACS](https://www.cs.utexas.edu/users/moore/acl2/manuals/current/manual/index-seo.php/SATLINK____DIMACS)
+cnf file as first argument and second argument as output file. There is one part missing
+implementation in the `MiniSAT` solver that is needed for `formulation 3`. 
 
-It also possible to use this to generate a DIMACS cnf file, I implemented a variant of 
-[Tseitin Transform](https://en.wikipedia.org/wiki/Tseytin_transformation) to make this, and performance
-using MiniSAT is worse than using OR Tools, but scales better. 
-
+You can compile code using maven. 
 ```shell
-brew install maven 
+brew install maven # If on OSX of course. 
 mvn package
-java -jar target/jigsaw-1.0-SNAPSHOT.jar --random --M=5 --N=5
 ```
 
-Sample Output:
-```
-Using random jigsaw puzzle
-Argument --sat_solver_path=[path] missing, using Google OR Tools
-Source diagram:
-   -      -      -
-|     <<     <<     |
-   V      ^      V
-   V      ^      V
-|     >>     <<     |
-   V      ^      ^
-   V      ^      ^
-|     <<     <<     |
-   -      -      -
-
-Reconstituted Diagram:
-   -      -      -
-|     <<     <<     |
-   ^      V      V
-   ^      V      V
-|     >>     <<     |
-   ^      V      ^
-   ^      V      ^
-|     >>     >>     |
-   -      -      -
-
-1. (1,0,1) -> (0,1,2)
-2. (0,1,3) -> (2,1,3)
-3. (2,1,0) -> (1,0,3)
-4. (2,0,3) -> (0,0,0)
-5. (1,1,0) -> (1,1,2)
-6. (2,2,0) -> (2,0,3)
-7. (0,2,3) -> (0,2,1)
-8. (1,2,1) -> (1,2,3)
-9. (0,0,2) -> (2,2,0)
+To invoke the OR Tools solver which is supported for all formulations, use: 
+```shell 
+java -jar target/jigsaw-1.0-SNAPSHOT.jar --random --M=32 --N=32 
 ```
 
-You can also use any SAT solver that accepts cnf files. 
+To use `MiniSAT` you can pass the argument `--sat_solver_path=` to the path where you
+have installed it locally. Since only two formulations are supported here, you need
+to specify that as well. Example:
 ```shell
-java -jar target/jigsaw-1.0-SNAPSHOT.jar \
-  --random --M=3 --N=3 \
-  --sat_solver_path=/Users/anita/bin/bin/minisat
+java -jar target/jigsaw-1.0-SNAPSHOT.jar --random --M=5 --N=5 \
+  --sat_solver_path=/Users/anita/bin/bin/minisat \
+  --formulation=2
 ```
 
-```
-Using random jigsaw puzzle
-Source diagram:
-   -      -      -
-|     >>     >>     |
-   ^      ^      V
-   ^      ^      V
-|     >>     >>     |
-   V      ^      ^
-   V      ^      ^
-|     >>     <<     |
-   -      -      -
-
-File Written
-Waiting for concat
-File Concatenated
-Waiting for miniSAT
-============================[ Problem Statistics ]=============================
-|                                                                             |
-|  Number of variables:           315                                         |
-|  Number of clauses:           12483                                         |
-|  Parse time:                   0.00 s                                       |
-|  Eliminated clauses:           0.00 Mb                                      |
-|  Simplification time:          0.01 s                                       |
-|                                                                             |
-============================[ Search Statistics ]==============================
-| Conflicts |          ORIGINAL         |          LEARNT          | Progress |
-|           |    Vars  Clauses Literals |    Limit  Clauses Lit/Cl |          |
-===============================================================================
-===============================================================================
-restarts              : 1
-conflicts             : 0              (0 /sec)
-decisions             : 11             (0.00 % random) (1098 /sec)
-propagations          : 234            (23358 /sec)
-conflict literals     : 0              ( nan % deleted)
-Memory used           : 5.76 MB
-CPU time              : 0.010018 s
-
-SATISFIABLE
-miniSAT done
-Reading solution
-Done parsing solution
-Reconstituted Diagram:
-   -      -      -
-|     >>     >>     |
-   ^      ^      V
-   ^      ^      V
-|     >>     >>     |
-   V      ^      ^
-   V      ^      ^
-|     >>     <<     |
-   -      -      -
-
-1. (1,1,3) -> (1,1,1)
-2. (0,0,2) -> (0,2,1)
-3. (1,2,0) -> (1,2,0)
-4. (2,2,2) -> (2,2,2)
-5. (0,1,3) -> (0,1,1)
-6. (0,2,3) -> (0,0,2)
-7. (2,0,2) -> (2,0,2)
-8. (2,1,3) -> (2,1,1)
-9. (1,0,0) -> (1,0,0)
-```
+## TODO
 
 * TODO: Take custom user pieces instead of random.
 * TODO: Use better SAT solvers like Glucose.
 * TODO: Submit the problems to SAT competition 2023.
-

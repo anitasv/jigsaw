@@ -8,6 +8,7 @@ import me.anitasv.sat.SatModel;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Function;
 
 
 /**
@@ -15,7 +16,9 @@ import java.util.List;
  */
 public class Main {
 
-    private static void formulateAndSolve(int M, int N, SatModel model) throws IOException {
+    private static void formulateAndSolve(int M, int N, SatModel model,
+                                          JigsawSolverFactory toSolver)
+            throws IOException {
         Jigsaw jigSaw = new Jigsaw(M, N);
         System.out.println("Source diagram:");
         System.out.println(jigSaw);
@@ -28,7 +31,7 @@ public class Main {
             L[i] = withSoln[i].loc();
         }
 
-        JigsawSolver3 jigsawSolver = new JigsawSolver3(M, N, B);
+        JigsawSolver jigsawSolver = toSolver.newSolver(M, N, B);
 
         System.out.println("Formulating SAT problem.");
         jigsawSolver.formulate(model);
@@ -45,6 +48,7 @@ public class Main {
         boolean randomProblem = false;
         Integer M = null, N = null;
         String satSolverPath = null;
+        int formulation = 3;
         for (String arg : args) {
             if (arg.equals("--random")) {
                 randomProblem = true;
@@ -62,7 +66,26 @@ public class Main {
                 }
             } else if (arg.startsWith("--sat_solver_path=")) {
                 satSolverPath = arg.substring("--sat_solver_path=".length());
+            } else if (arg.startsWith("--formulation=")) {
+                try {
+                    formulation = Integer.parseInt(arg.substring("--formulation=".length()));
+                } catch (NumberFormatException e) {
+                    System.out.println("formulation: " + e.getMessage());
+                }
             }
+        }
+
+
+        JigsawSolverFactory jigsawSolverFactory = switch (formulation) {
+            case 1 -> JigsawSolver1::new;
+            case 2 -> JigsawSolver2::new;
+            case 3 -> JigsawSolver3::new;
+            default -> null;
+        }
+                ;
+        if (jigsawSolverFactory == null) {
+            System.out.println("Unsupported formulation: " + formulation);
+            System.exit(1);
         }
         if (randomProblem) {
             System.out.println("Using random jigsaw puzzle.");
@@ -90,7 +113,7 @@ public class Main {
                         "jig_rand_" + M + "x" + N + ".",
                         satSolverPath);
             }
-            formulateAndSolve(M, N, model);
+            formulateAndSolve(M, N, model, jigsawSolverFactory);
         } else {
             System.exit(1);
         }

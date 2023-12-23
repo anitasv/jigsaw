@@ -13,7 +13,7 @@ import static me.anitasv.jigsaw.Jigsaw.*;
  * An improved Jigsaw formulation:
  *
  */
-public class JigsawSolver3 {
+public class JigsawSolver3  implements JigsawSolver {
 
     private final int M;
     private final int N;
@@ -235,6 +235,7 @@ public class JigsawSolver3 {
         return pcs.toString();
     }
 
+    @Override
     public void formulate(SatModel model) {
         createVariables(model);
         setOneHot(model);
@@ -284,6 +285,7 @@ public class JigsawSolver3 {
         }
     }
 
+    @Override
     public List<JigsawLocation> solve(SatModel model) {
         Set<Integer> solution = model.solve();
 

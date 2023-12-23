@@ -12,7 +12,7 @@ import static me.anitasv.jigsaw.Jigsaw.SIDES;
  * An improved Jigsaw formulation:
  *
  */
-public class JigsawSolver2 {
+public class JigsawSolver2  implements JigsawSolver {
 
     private final int M;
     private final int N;
@@ -127,7 +127,8 @@ public class JigsawSolver2 {
         return (pos + s) % SIDES;
     }
 
-    public void formulate(SatModel model) throws FileNotFoundException {
+    @Override
+    public void formulate(SatModel model) {
         createVariables(model);
         setOneHot(model);
 
@@ -204,6 +205,7 @@ public class JigsawSolver2 {
         });
     }
 
+    @Override
     public List<JigsawLocation> solve(SatModel model) {
         //  Create a solver and solve the model.
         Set<Integer> solution = model.solve();
