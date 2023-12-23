@@ -14,7 +14,7 @@ This project tries to formulate a SAT / SMT problem which can be solved
 Long story short. In Formulation 1, 10x10 was fast enough to run in a few minutes, 
 13x13 took hours and 100s of GB of memory. Formulation 2, 13x13 takes around 30 seconds,
 largest I can run is about 18x18. Formulation 3, I can run 32x32 in just 2-3 seconds. I
-think we have finally reached the limit of this. 64x64 runs in 283 seconds. 70x72 (5040 piece)
+think we have finally reached the limit of this. 64x64 runs in 237 seconds. 70x72 (5040 piece)
 puzzle took about 9 minutes.
 
 There are two supported solvers, one is [Google OR Tools](https://developers.google.com/optimization), 
@@ -42,6 +42,20 @@ java -jar target/jigsaw-1.0-SNAPSHOT.jar --random --M=5 --N=5 \
   --sat_solver_path=/Users/anita/bin/bin/minisat \
   --formulation=2
 ```
+
+## Benchmarks
+All benchmarks using OR Tools with 15G heap space, in 8 core M2 macbook Air. It
+is a multithreaded solver, so more cores will make it run faster. 
+
+| Problem  | Pieces(n) | Formulation 1 | Formulation 2 | Formulation 3 |
+|----------|-----------|---------------|---------------|---------------|
+| 5x5      | 25        | 2.78 s        | 0.59 s        | 0.42 s        |
+| 10x10    | 100       | 214 s         | 2.88 s        | 0.58 s        |
+| 15x15    | 225       | O.O.M.        | 16.98 s       | 1.04 s        |
+| 20x20    | 400       |               | 1257 s        | 1.83 s        |
+| 32x32    | 1024      |               | O.O.M.        | 10.86 s       |
+| 64x64    | 4096      |               |               | 237 s         |
+| 70x72    | 5040      |               |               | 540 s         |
 
 ## TODO
 
