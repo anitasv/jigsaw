@@ -15,7 +15,7 @@ Long story short. In Formulation 1, 10x10 was fast enough to run in a few minute
 13x13 took hours and 100s of GB of memory. Formulation 2, 13x13 takes around 30 seconds,
 largest I can run is about 18x18. Formulation 3, I can run 32x32 in just 2-3 seconds. I
 think we have finally reached the limit of this. 64x64 runs in 237 seconds. 70x72 (5040 piece)
-puzzle took about 9 minutes.
+puzzle took about 24 minutes.
 
 There are two supported solvers, one is [Google OR Tools](https://developers.google.com/optimization), 
 and other is [MiniSAT](http://minisat.se/). In fact I support any tool like MiniSAT that takes 
@@ -55,7 +55,7 @@ is a multithreaded solver, so more cores will make it run faster.
 | 20x20    | 400       |               | 1257 s        | 1.83 s        |
 | 32x32    | 1024      |               | O.O.M.        | 10.86 s       |
 | 64x64    | 4096      |               |               | 237 s         |
-| 70x72    | 5040      |               |               | 540 s         |
+| 70x72    | 5040      |               |               | 1435 s        |
 
 ## TODO
 
