@@ -85,6 +85,7 @@ public class Main {
                 Loader.loadNativeLibraries();
                 model = new GoogleModel();
             } else {
+                System.out.println("Formulation 3 is not supported in cnf model yet.");
                 model = new CnfModel("Jigsaw " + M + "x" + N,
                         "jig_rand_" + M + "x" + N + ".",
                         satSolverPath);

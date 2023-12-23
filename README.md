@@ -13,8 +13,8 @@ https://www.youtube.com/watch?v=Gu_1S77XkiM and https://www.youtube.com/watch?v=
 Long story short. Formulation 1 10x10 was fast enough to run in a few minutes, 
 13x13 took hours and 100s of GB of memory. Formulation 2, 13x13 takes around 30 seconds,
 largest I can run is about 18x18. Formulation 3, I can run 32x32 in just 2-3 seconds. I
-think we have finally reached the limit of this.
-
+think we have finally reached the limit of this. 64x64 runs in 283 seconds. 70x72 (5040 piece)
+puzzle took about 9 minutes.
 
 See a sample result of 13x13 in [RUNS](./RUNS.md).
 
@@ -137,7 +137,6 @@ Reconstituted Diagram:
 ```
 
 * TODO: Take custom user pieces instead of random.
-* TODO: A better formulation that doesn't take GB sized cnf files. 
 * TODO: Use better SAT solvers like Glucose.
 * TODO: Submit the problems to SAT competition 2023.
 
