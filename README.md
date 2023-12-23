@@ -1,9 +1,11 @@
 ## Introduction
 
 Solves White jigsaw puzzles, which means there is no picture or anything on each piece.
-Also assuming all tabs and pockets fit each other. Due to 
-[Paper](https://erikdemaine.org/papers/Jigsaw_GC/paper.pdf) we know these are NP complete.
+Also assuming all tabs and pockets fit each other. 
+![img.png](img.png)
+Due to [Damien and Damien](https://erikdemaine.org/papers/Jigsaw_GC/paper.pdf) we know these are NP complete.
 This project tries to formulate a SAT / SMT problem which can be solved 
+
 
 | Formulation                 | Number of Variables | Number of Clauses |
 |-----------------------------|---------------------|-------------------|
