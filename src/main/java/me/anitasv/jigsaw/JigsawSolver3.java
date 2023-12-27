@@ -334,19 +334,38 @@ public class JigsawSolver3  implements JigsawSolver {
         }
         boolean hasError = false;
 
-
-
+        outerLoop:
         for (int m = 0; m < M; m++) {
             for (int n = 0; n < N; n++) {
-                int index = canonical.getCanonicalIndex(jigSaw.pieces[m][n]);
+                JigsawPiece targetPiece = jigSaw.pieces[m][n];
+                int index = canonical.getCanonicalIndex(targetPiece);
                 Deque<Integer> bDq = remapping.get(index);
                 if (bDq == null || bDq.isEmpty()) {
                     hasError = true;
-                    break;
+                    break outerLoop;
                 }
                 int bIndex = remapping.get(index).pop();
-                // TODO determine rotation.
-                output.set(bIndex, new JigsawLocation(m, n, 0));
+                JigsawPiece sourcePiece = B[bIndex];
+                int rotValue = -1;
+                for (int rot = 0; rot < SIDES; rot++) {
+                    boolean found = true;
+                    for (int s = 0; s < SIDES; s++) {
+                        if (sourcePiece.pokes[(s + rot) % 4] != targetPiece.pokes[s]) {
+                            found = false;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        rotValue = rot;
+                        break;
+                    }
+                }
+                if (rotValue == -1) {
+                    hasError = true;
+                    break outerLoop;
+                }
+
+                output.set(bIndex, new JigsawLocation(m, n, rotValue));
             }
         }
 
@@ -354,8 +373,6 @@ public class JigsawSolver3  implements JigsawSolver {
             System.out.println("formulation has bugs.");
             return null;
         }
-        System.out.println("Reconstituted Diagram:");
-        System.out.println(jigSaw);
         return output;
     }
 }
