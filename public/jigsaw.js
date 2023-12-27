@@ -59,7 +59,7 @@ function drawJigs(outerBox, withGap, M, N, J, isSoln) {
     const outerWidth = (N * (boxSize + boxGap));
     const outerHeight = (M * (boxSize + boxGap));
 
-    const scale = Math.min(500/outerWidth, 500/outerHeight);
+    const scale = Math.min(800/outerWidth, 800/outerHeight);
     const transformWidth = scale * outerWidth;
     const transformHeight = scale * outerHeight;
 
@@ -229,7 +229,7 @@ function drawRight() {
 let J = [];
 let M = 1;
 let N = 1;
-let expanded = true;
+let expanded = false;
 let solution = [];
 let solved = true;
 let J_right = [];
@@ -323,6 +323,28 @@ function randInt(bound) {
     }
 }
 
+let intervalId = null;
+
+function animateSolving() {
+    intervalId = setInterval(() => {
+        if (!solved) {
+            J_right = [];
+            for (let i = 0; i < J.length; i++) {
+                J_right.push(J[i]);
+            }
+            for (let i = 0; i < J_right.length; i++) {
+                let j = i + randInt(J_right.length - i);
+                const nextPiece = J_right[j];
+                J_right[j] = J_right[i];
+
+                let s = randInt(4);
+                J_right[i] = rotatePiece(nextPiece, s);
+            }
+            drawRight();
+        }
+    }, 1000);
+}
+
 function shuffle() {
     resetSolution();
     for (let i = 0; i < J.length; i++) {
@@ -350,6 +372,7 @@ function expand() {
 
 function solve() {
     resetSolution();
+    animateSolving();
     const repr = piece => piece.join(",");
     let problem = '';
     for (let i = 0; i < J.length; i++) {
@@ -370,6 +393,7 @@ function solve() {
                 if (line1.startsWith("UNSOLVABLE:")) {
                     console.log(line1);
                 }
+                clearInterval(intervalId);
                 solution = splits.map(line =>
                     line.split(",").map(x => parseInt(x))
                 );
@@ -403,9 +427,9 @@ function main() {
         redraw();
     });
 
-    $("expand").addEventListener('click', (evt => {
-        expand();
-    }))
+    // $("expand").addEventListener('click', (evt => {
+    //     expand();
+    // }))
 
     $("shuffle").addEventListener('click', (evt => {
         shuffle();
