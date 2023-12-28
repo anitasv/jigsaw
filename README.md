@@ -14,7 +14,7 @@ This project tries to formulate a SAT / SMT problem which can be solved
 |-----------------------------|---------------------|-------------------|
 | [1](https://mathb.in/77183) | n^2 + 4n            | 48n^4 + n^2 + n   |
 | [2](https://mathb.in/77190) | n^2 + 6n            | 16n^2 + 4n        |
-| [3](https://mathb.in/77209) | 26n                 | O(n log(n))       |
+| [3](https://mathb.in/77209) | 6n                  | O(n log(n))       |
 
 Long story short. In Formulation 1, 10x10 was fast enough to run in a few minutes, 
 13x13 took hours and 100s of GB of memory. Formulation 2, 13x13 takes around 30 seconds,

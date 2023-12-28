@@ -103,4 +103,10 @@ public class JigsawCanonical {
     public int borderSize() {
         return borderSize;
     }
+
+    public static void main(String[] args) {
+        JigsawCanonical canonical = new JigsawCanonical();
+        System.out.println(canonical.interiorSize());
+        System.out.println(canonical.borderSize());
+    }
 }
