@@ -140,6 +140,15 @@ function drawJigs(outerBox, withGap, M, N, J, isSoln) {
                     path.addEventListener('mouseover', (evt) => {
                         path.setAttributeNS(null, 'fill', 'yellow');
                         if (solved) {
+                            const canIndex = canonical[m * N + n];
+                            for (let i = 0; i < J.length; i++) {
+                                if (canonical[i] === canIndex) {
+                                    const soln = solution[i];
+                                    const mark = bridge.output.newPaths[soln[0] * N + soln[1]];
+                                    mark.setAttributeNS(null, 'fill', 'green');
+                                }
+                            }
+
                             const soln = solution[m * N + n];
                             const mark = bridge.output.newPaths[soln[0] * N + soln[1]];
                             mark.setAttributeNS(null, 'fill', 'white');
@@ -148,6 +157,15 @@ function drawJigs(outerBox, withGap, M, N, J, isSoln) {
                     path.addEventListener('mouseout', (evt) => {
                         path.setAttributeNS(null, 'fill', 'cornflowerblue');
                         if (solved) {
+                            const canIndex = canonical[m * N + n];
+                            for (let i = 0; i < J.length; i++) {
+                                if (canonical[i] === canIndex) {
+                                    const soln = solution[i];
+                                    const mark = bridge.output.newPaths[soln[0] * N + soln[1]];
+                                    mark.setAttributeNS(null, 'fill', 'cornflowerblue');
+                                }
+                            }
+
                             const soln = solution[m * N + n];
                             const mark = bridge.output.newPaths[soln[0] * N + soln[1]];
                             mark.setAttributeNS(null, 'fill', 'cornflowerblue');
@@ -233,6 +251,8 @@ let expanded = false;
 let solution = [];
 let solved = true;
 let J_right = [];
+let canonical = [];
+
 const bridge = {
     input: {},
     output: {}
@@ -394,11 +414,16 @@ function solve() {
                     console.log(line1);
                 }
                 clearInterval(intervalId);
-                solution = splits.map(line =>
+                const parsedResponse = splits.map(line =>
                     line.split(",").map(x => parseInt(x))
                 );
-                solved = true;
-                drawOuter();
+
+                for (let i = 0; i < J.length; i++) {
+                    solution[i] = parsedResponse[i];
+                }
+                for (let i = 0; i < J.length; i++) {
+                    canonical[i] = parsedResponse[i + J.length][0];
+                }
 
                 J_right = []
                 for (let i = 0; i < J.length; i++) {
@@ -413,6 +438,8 @@ function solve() {
                     }
                     J_right[solnIndex] = newPiece;
                 }
+                solved = true;
+                drawOuter();
                 drawRight();
             });
         } else {

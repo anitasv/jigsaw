@@ -15,6 +15,7 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,7 +136,6 @@ public class Server {
         return charset;
     }
 
-
     static class JigsawHandler implements HttpHandler {
 
         @Override
@@ -212,17 +212,27 @@ public class Server {
                 solver.formulate(model);
                 List<JigsawLocation> solution = solver.solve(model);
 
+                JigsawCanonical jigsawCanonical = new JigsawCanonical();
+                List<Integer> canonicals = new ArrayList<>();
+                for (JigsawPiece piece : B) {
+                    canonicals.add(jigsawCanonical.getCanonicalIndex(piece));
+                }
+
                 if (solution == null) {
                     writePlainText(exchange, "UNSOLVABLE: So solution found", 200);
                     return;
                 }
 
-                String output = solution.stream()
+                String solutionOutput = solution.stream()
                         .map(JigsawLocation::toString)
                         .collect(Collectors.joining("\n"));
+
+                String canonicalOutput = canonicals.stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining("\n"));
+
+                String output = solutionOutput + "\n" + canonicalOutput;
                 writePlainText(exchange, output, 200);
-
-
             } catch (Exception e) {
                 e.printStackTrace();
                 exchange.sendResponseHeaders(500, 0);
