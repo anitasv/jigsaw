@@ -87,7 +87,7 @@ public class JigsawSolver3  implements JigsawSolver {
         }
         // For top and bottom row we have to skip corners as it is
         // already done in column section.
-        for (int n = 1; n < M - 1; n++) {
+        for (int n = 1; n < N - 1; n++) {
             for (int j = 0; j < canonical.borderSize(); j++) {
                 // First Row
                 J.put(new JigsawPosition(0, n, j),
@@ -323,7 +323,12 @@ public class JigsawSolver3  implements JigsawSolver {
                 for (PieceConstraint pc : pieceConstraints) {
                     int canonicalIndex = canonical.getCanonicalIndex(pc.piece);
                     JigsawPosition pos = new JigsawPosition(m, n, canonicalIndex);
-                    model.addBoolAndImplies(pc.constraint, J.get(pos));
+                    Integer jVar = J.get(pos);
+                    if (jVar == null) {
+                        System.out.println("(" + m + "," + n + ") -> " + canonicalIndex);
+                        System.exit(1);
+                    }
+                    model.addBoolAndImplies(pc.constraint, jVar);
                 }
             }
         }

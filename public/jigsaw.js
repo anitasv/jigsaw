@@ -2,11 +2,6 @@
 
 const $ = (id) => document.getElementById(id);
 
-const getCenter = (elem) => {
-    const rect = elem.getBoundingClientRect();
-    return  [rect.x + rect.width / 2, rect.y + rect.height / 2];
-}
-
 const svgNs = "http://www.w3.org/2000/svg";
 
 function svgCreate(name, attrs) {
