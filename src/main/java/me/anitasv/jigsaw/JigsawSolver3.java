@@ -1,7 +1,6 @@
 package me.anitasv.jigsaw;
 import me.anitasv.sat.SatModel;
 
-import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
@@ -22,7 +21,10 @@ public class JigsawSolver3  implements JigsawSolver {
     private final int[][] H;
     private final int[][] V;
 
-    private final int[][][] J;
+    record JigsawPosition(int m, int n, int j) {
+    }
+
+    private final Map<JigsawPosition, Integer> J;
 
     private final JigsawCanonical canonical;
 
@@ -41,7 +43,7 @@ public class JigsawSolver3  implements JigsawSolver {
         this.V = new int[M][N - 1]; // Every cell except last column has a non-trivial right.
 
         // Every cell can be canonically be mapped to one of the 24 options.
-        this.J = new int[M][N][canonical.size()];
+        this.J = new HashMap<>();
     }
 
     public void createVariables(SatModel model) {
@@ -57,10 +59,44 @@ public class JigsawSolver3  implements JigsawSolver {
             }
         }
 
+
+
+        int borderSize = canonical.borderSize();
+
+        for (int m = 1; m < M - 1; m++) {
+            for (int n = 1; n < N - 1; n++) {
+                for (int j = 0; j < canonical.interiorSize(); j++) {
+                    J.put(new JigsawPosition(m, n, borderSize + j),
+                            model.newVariable("J_" + m + "," + n + "," + j + "}"));
+                }
+            }
+        }
+
         for (int m = 0; m < M; m++) {
-            for (int n = 0; n < N; n++) {
-                for (int j = 0; j < canonical.size(); j++) {
-                    J[m][n][j] = model.newVariable("J_" + m + "," + n + "," + j + "}");
+            for (int j = 0; j < canonical.borderSize(); j++) {
+                // First Column
+                J.put(new JigsawPosition(m, 0, j),
+                        model.newVariable("J_{" + m + "," + 0 + "," + j + "}"));
+
+                if (0 != N - 1) {
+                    // Last Column
+                    J.put(new JigsawPosition(m, N - 1, j),
+                            model.newVariable("J_{" + m + "," + (N - 1) + "," + j + "}"));
+                }
+            }
+        }
+        // For top and bottom row we have to skip corners as it is
+        // already done in column section.
+        for (int n = 1; n < M - 1; n++) {
+            for (int j = 0; j < canonical.borderSize(); j++) {
+                // First Row
+                J.put(new JigsawPosition(0, n, j),
+                        model.newVariable("J_{" + 0 + "," + n + "," + j + "}"));
+
+                if (0 != M - 1) {
+                    // Last Row
+                    J.put(new JigsawPosition(M - 1, n, j),
+                            model.newVariable("J_{" + (M - 1) + "," + n + "," + j + "}"));
                 }
             }
         }
@@ -69,11 +105,14 @@ public class JigsawSolver3  implements JigsawSolver {
     public void setOneHot(SatModel model) {
         for (int m = 0; m < M; m++) {
             for (int n = 0; n < N; n++) {
-                int[] selectCell = new int[canonical.size()];
+                List<Integer> selectCell = new ArrayList<>();
                 for (int j = 0; j < canonical.size(); j++) {
-                    selectCell[j] = J[m][n][j];
+                    Integer canonicalVar = J.get(new JigsawPosition(m, n, j));
+                    if (canonicalVar != null) {
+                        selectCell.add(canonicalVar);
+                    }
                 }
-                model.addExactlyOne(selectCell);
+                model.addExactlyOne(selectCell.stream().mapToInt(x -> x).toArray());
             }
         }
     }
@@ -253,14 +292,18 @@ public class JigsawSolver3  implements JigsawSolver {
         }
 
         for (int j = 0; j < canonical.size(); j++) {
-            int[] selectCell = new int[tot];
+            List<Integer> selectCell = new ArrayList<>();
             for (int m = 0; m < M; m++) {
                 for (int n = 0; n < N; n++) {
-                    selectCell[m * N + n] = J[m][n][j];
+                    Integer canonicalVar = J.get(new JigsawPosition(m, n, j));
+                    if (canonicalVar != null) {
+                        selectCell.add(canonicalVar);
+                    }
                 }
             }
             int limit = canonicalLimits.getOrDefault(j, 0);
-            model.addExactly(selectCell, limit);
+            model.addExactly(selectCell.stream().mapToInt(x -> x).toArray(),
+                    limit);
         }
 
         // (-, -, <, >) -> J variable is true.
@@ -279,7 +322,8 @@ public class JigsawSolver3  implements JigsawSolver {
 
                 for (PieceConstraint pc : pieceConstraints) {
                     int canonicalIndex = canonical.getCanonicalIndex(pc.piece);
-                    model.addBoolAndImplies(pc.constraint, J[m][n][canonicalIndex]);
+                    JigsawPosition pos = new JigsawPosition(m, n, canonicalIndex);
+                    model.addBoolAndImplies(pc.constraint, J.get(pos));
                 }
             }
         }

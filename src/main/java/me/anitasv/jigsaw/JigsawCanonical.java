@@ -9,9 +9,12 @@ public class JigsawCanonical {
 
     private final Map<List<JigsawPoke>, Integer> pieceIndex = new HashMap<>();
     private final int size;
+    private final int interiorSize;
+    private final int borderSize;
 
     public JigsawCanonical() {
-        DisjointSet<List<JigsawPoke>> canonicals = new DisjointSet<>();
+        DisjointSet<List<JigsawPoke>> borderCanonicals = new DisjointSet<>();
+        DisjointSet<List<JigsawPoke>> interiorCanonicals = new DisjointSet<>();
 
         JigsawPoke[] pokes = JigsawPoke.values();
         int pokeCount = pokes.length;
@@ -21,27 +24,45 @@ public class JigsawCanonical {
         for (int i = 0; i < totalCubes; i++) {
             List<JigsawPoke> side = new ArrayList<>();
             int elem = i;
+            boolean hasFlat = false;
             for (int j = 0; j < Jigsaw.SIDES; j++) {
-                side.add(pokes[elem % pokeCount]);
+                JigsawPoke poke = pokes[elem % pokeCount];
+                side.add(poke);
                 elem = elem / pokeCount;
+                if (poke == JigsawPoke.FLAT) {
+                    hasFlat = true;
+                }
             }
-            canonicals.add(side);
+            if (hasFlat) {
+                borderCanonicals.add(side);
+            } else {
+                interiorCanonicals.add(side);
+            }
         }
 
-        for (List<JigsawPoke> str : canonicals.ogElements()) {
+        for (List<JigsawPoke> str : borderCanonicals.ogElements()) {
             for (int i = 0; i < Jigsaw.SIDES; i++) {
                 List<JigsawPoke> rotated = new ArrayList<>();
                 rotated.addAll(str.subList(i, Jigsaw.SIDES));
                 rotated.addAll(str.subList(0, i));
-                canonicals.union(str, rotated);
+                borderCanonicals.union(str, rotated);
+            }
+        }
+
+        for (List<JigsawPoke> str : interiorCanonicals.ogElements()) {
+            for (int i = 0; i < Jigsaw.SIDES; i++) {
+                List<JigsawPoke> rotated = new ArrayList<>();
+                rotated.addAll(str.subList(i, Jigsaw.SIDES));
+                rotated.addAll(str.subList(0, i));
+                interiorCanonicals.union(str, rotated);
             }
         }
 
         Map<List<JigsawPoke>, Integer> knownRoots = new HashMap<>();
         int nextIndex = 0;
 
-        for (List<JigsawPoke> str : canonicals.ogElements()) {
-            List<JigsawPoke> canonical = canonicals.findCanonical(str);
+        for (List<JigsawPoke> str : borderCanonicals.ogElements()) {
+            List<JigsawPoke> canonical = borderCanonicals.findCanonical(str);
             Integer currentIndex = knownRoots.get(canonical);
             if (currentIndex == null) {
                 currentIndex = nextIndex;
@@ -50,7 +71,21 @@ public class JigsawCanonical {
             }
             pieceIndex.put(str, currentIndex);
         }
+        borderSize = nextIndex;
+
+        for (List<JigsawPoke> str : interiorCanonicals.ogElements()) {
+            List<JigsawPoke> canonical = interiorCanonicals.findCanonical(str);
+            Integer currentIndex = knownRoots.get(canonical);
+            if (currentIndex == null) {
+                currentIndex = nextIndex;
+                knownRoots.put(canonical, currentIndex);
+                nextIndex++;
+            }
+            pieceIndex.put(str, currentIndex);
+        }
+
         size = nextIndex;
+        interiorSize = size - borderSize;
     }
 
     public int getCanonicalIndex(JigsawPiece sides) {
@@ -61,4 +96,11 @@ public class JigsawCanonical {
         return size;
     }
 
+    public int interiorSize() {
+        return interiorSize;
+    }
+
+    public int borderSize() {
+        return borderSize;
+    }
 }
