@@ -52,15 +52,18 @@ java -jar target/jigsaw-1.0-SNAPSHOT.jar --random --M=5 --N=5 \
 All benchmarks using OR Tools with 15G heap space, in 8 core M2 macbook Air. It
 is a multithreaded solver, so more cores will make it run faster. 
 
-| Problem  | Pieces(n) | Formulation 1 | Formulation 2 | Formulation 3 |
-|----------|-----------|---------------|---------------|---------------|
-| 5x5      | 25        | 2.78 s        | 0.59 s        | 0.42 s        |
-| 10x10    | 100       | 214 s         | 2.88 s        | 0.58 s        |
-| 15x15    | 225       | O.O.M.        | 16.98 s       | 1.04 s        |
-| 20x20    | 400       |               | 1257 s        | 1.83 s        |
-| 32x32    | 1024      |               | O.O.M.        | 10.86 s       |
-| 64x64    | 4096      |               |               | 237 s         |
-| 70x72    | 5040      |               |               | 1435 s        |
+You should take these benchmarks with a grain of salt, as I ran 1 or 2 times, 
+not statistically correct.
+
+| Problem  | Pieces(n) | Formulation 1 | Formulation 2 | Formulation 3 | Formulation 3 (FIX) |
+|----------|-----------|---------------|---------------|---------------|---------------------|
+| 5x5      | 25        | 2.78 s        | 0.59 s        | 0.42 s        | 0.47s               |
+| 10x10    | 100       | 214 s         | 2.88 s        | 0.58 s        | 0.59s               |
+| 15x15    | 225       | O.O.M.        | 16.98 s       | 1.04 s        | 0.97s               |
+| 20x20    | 400       |               | 1257 s        | 1.83 s        | 1.67s               |
+| 32x32    | 1024      |               | O.O.M.        | 10.86 s       | 3.39s               |
+| 64x64    | 4096      |               |               | 237 s         | 95s                 |
+| 70x72    | 5040      |               |               | 1435 s        | 445s                |
 
 ## TODO
 
